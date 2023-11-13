@@ -29,6 +29,7 @@ namespace ThermoCouple {
             InitializePorts();
         }
 
+        // method to fill box with ports
         public void InitializePorts() {
             serialPorts = SerialPort.GetPortNames();
             if (serialPorts.Count() != 0) {
@@ -45,21 +46,42 @@ namespace ThermoCouple {
         }
 
         #region WPF to Arduino connection
+        private void ConnectButton_Click(object sender, RoutedEventArgs e) {
+            if (!isConnectedToArduino) {
+                ConnectButton.IsEnabled = false;
+                ConnectButton.Content = "Connection...";
+                ConnectToArduino();
+            } else {
+                DisconnectFromArduino();
+            }
+        }
+
         bool isConnectedToArduino = false;
-        public void ConnectToArduino () {
+        bool isArduino = false;
+        public async void ConnectToArduino () {
+            isConnectedToArduino = false;
+            isArduino = false;
+
             try {
                 string currentPortName = ComPortsBox.SelectedItem.ToString();
                 serialPort = new SerialPort(currentPortName, 9600);
-                serialPort.Open();
-                serialPort.ReadTimeout = 1000;
-                serialPort.WriteTimeout = 20;
-                if (IsArduinoPort()) {
+                await Task.Run(() => serialPort.Open());
+                serialPort.ReadTimeout = 500;
+                serialPort.WriteTimeout = 500;
+
+                await CheckIfIsArduinoPortAsync();
+                if (isArduino) {
                     ConnectButton.Content = "Disconnect";
                     isConnectedToArduino = true;
+                } else {
+                    ConnectButton.Content = "Connect";
+                    isConnectedToArduino = false;
                 }
             } catch (Exception exc) { 
-                MessageBox.Show(exc.Message); 
+                MessageBox.Show(exc.Message);
             }
+
+            ConnectButton.IsEnabled = true;
         }
 
         private void DisconnectFromArduino() {
@@ -68,28 +90,51 @@ namespace ThermoCouple {
             serialPort.Close();
         }
 
-        private void ConnectButton_Click(object sender, RoutedEventArgs e) {
-            if (!isConnectedToArduino) {
-                ConnectToArduino();
-            } else {
-                DisconnectFromArduino();
-            }
-        }
-
         // Проверка открытия порта и его верификация
-        public bool IsArduinoPort() {
-            serialPort.Write("r");
-            string answer = serialPort.ReadLine();
-            if (answer == "Salve\r") {
-                return true;
-            } else {
-                return false;
-            }
+        public async Task CheckIfIsArduinoPortAsync() {
+            serialPort.ReadTimeout = 2000;
+            serialPort.WriteTimeout = 2000;
+
+            await Task.Run(() => {
+                try {
+                    serialPort.Write("r");
+                    string answer = serialPort.ReadLine();
+                    if (answer == "Salve\r") {
+                        isArduino = true;
+                    } else {
+                        isArduino = false;
+                    }
+                } catch (Exception exc) {
+                    MessageBox.Show(exc.Message);
+                }
+            });
         }
 
         private void RefreshButton_Click(object sender, RoutedEventArgs e) {
             InitializePorts();
         }
         #endregion
+
+        private void Grid_MouseDown(object sender, MouseButtonEventArgs e) {
+            if (e.LeftButton == MouseButtonState.Pressed) {
+                DragMove();
+            }
+        }
+
+        private void ButtonMinimize_Click(object sender, RoutedEventArgs e) {
+            Application.Current.MainWindow.WindowState = WindowState.Minimized;
+        }
+
+        private void ButtonMaximize_Click(object sender, RoutedEventArgs e) {
+            if (Application.Current.MainWindow.WindowState != WindowState.Maximized) {
+                Application.Current.MainWindow.WindowState = WindowState.Maximized;
+            } else {
+                Application.Current.MainWindow.WindowState = WindowState.Normal;
+            }
+        }
+
+        private void CloseAppButton_Click(object sender, RoutedEventArgs e) {
+            Application.Current.Shutdown();
+        }
     }
 }

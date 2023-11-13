@@ -4,57 +4,160 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ThermoCouple"
-        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" xmlns:viewmodel="clr-namespace:ThermoCouple.MVVM.ViewModel"
         mc:Ignorable="d"
         FontSize="16"
         FontFamily="Calibri"
-        Title="ThermoCouple v0.5" 
+        WindowStyle="None"
+        ResizeMode="CanResizeWithGrip"
+        AllowsTransparency="True"
         Height="600" 
         Width="800">
 
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+    <Window.DataContext>
+        <viewmodel:MainViewModel/>
+    </Window.DataContext>
+
+    <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="150"/>
+            <ColumnDefinition Width="100*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="45"/>
+            <RowDefinition Height="100*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-        <materialDesign:Card Grid.Row="1" 
-                             Grid.Column="1" 
-                             Grid.RowSpan="4"
-                             Background="PeachPuff"/>
+        <Grid Grid.Row="1"
+              Grid.Column="1"
+              Grid.ColumnSpan="2"
+              MouseDown="Grid_MouseDown">
 
-        <TextBlock Margin="5" Grid.Row="1" 
-                   Grid.Column="1" 
-                   Text="Avaliable ports" />
+            <materialDesign:Card Background="#BAC6B0"
+                                 Margin="5"/>
 
-        <ComboBox Margin="5"
-            x:Name="ComPortsBox"
-                  Grid.Row="2" 
-                  Grid.Column="1" />
+            <TextBlock Margin="20,0" 
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Center"
+                       Text="ThermoCouple v0.5"
+                       FontFamily="Rubik"/>
 
-        <Button Margin="5" x:Name="RefreshButton"
-                VerticalAlignment="Bottom"
-                Grid.Row="3" 
-                Grid.Column="1" 
-                Content="Refresh" 
-                Click="RefreshButton_Click"
-                Style="{StaticResource MaterialDesignOutlinedButton}"/>    
-        
-        <Button Margin="5" x:Name="ConnectButton"
-                VerticalAlignment="Bottom"
-                Grid.Row="4" 
-                Grid.Column="1" 
-                Content="Connect" 
-                Click="ConnectButton_Click"/>
+            <StackPanel HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal"
+                        Margin="0,0,10,0">
+
+                <Button Margin="5"
+                        Background="#0F2F2B"
+                        BorderBrush="#0F2F2B"
+                        Foreground="White"
+                        Height="25"
+                        Width="25"
+                        Click="ButtonMinimize_Click"
+                        materialDesign:ElevationAssist.Elevation="Dp0"
+                        Style="{StaticResource MaterialDesignFloatingActionLightButton}">
+                    <materialDesign:PackIcon Kind="WindowMinimize"/>
+                </Button>
+                <Button Margin="5"
+                        Background="#0F2F2B"
+                        Foreground="White"
+                        BorderBrush="#0F2F2B"
+                        Height="25"
+                        Width="25"
+                        Click="ButtonMaximize_Click"
+                        materialDesign:ElevationAssist.Elevation="Dp0"
+                        Style="{StaticResource MaterialDesignFloatingActionLightButton}">
+                    <materialDesign:PackIcon Kind="WindowMaximize"/>
+                </Button>
+                <Button Margin="5"
+                        x:Name="CloseAppButton"
+                        Background="#0F2F2B"
+                        BorderBrush="#0F2F2B"
+                        Foreground="White"
+                        Height="25"
+                        Width="25"
+                        Click="CloseAppButton_Click"
+                        materialDesign:ElevationAssist.Elevation="Dp0"
+                        Style="{StaticResource MaterialDesignFloatingActionLightButton}">
+                    <materialDesign:PackIcon Kind="Close"/>
+                </Button>
+            </StackPanel>
+
+        </Grid>
+
+        <Grid Grid.Row="2"
+              Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <materialDesign:Card Background="Lavender"
+                                 Margin="5"
+                                 Grid.RowSpan="2"/>
+
+            <StackPanel Grid.Row="0"
+                        Grid.Column="0"
+                        Orientation="Vertical">
+                
+                <TextBlock Margin="10" 
+                           HorizontalAlignment="Center" 
+                           Text="Avaliable ports" />
+
+                <ComboBox Margin="10"
+                          x:Name="ComPortsBox" />
+            </StackPanel>
+            
+            <StackPanel Grid.Row="1"
+                        Grid.Column="0"
+                        Orientation="Vertical"
+                        VerticalAlignment="Bottom"
+                        Margin="10">
+
+                <Button x:Name="RefreshButton"
+                        VerticalAlignment="Bottom"
+                        Content="Refresh" 
+                        Click="RefreshButton_Click"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"/>
+
+                <Button Margin="0,10,0,0"
+                        x:Name="ConnectButton"
+                        VerticalAlignment="Bottom"
+                        Content="Connect" 
+                        Click="ConnectButton_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="2"
+              Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="100"/>
+            </Grid.RowDefinitions>
+
+            <materialDesign:Card Grid.RowSpan="3"
+                                 Margin="5"
+                                 Background="FloralWhite"/>
+
+            <TextBlock Grid.Row="0"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       FontWeight="Bold"
+                       FontSize="20"
+                       Text="Current temperature: X"/>
+
+            <materialDesign:PackIcon Kind="ThermometerCheck"
+                                     HorizontalAlignment="Right"
+                                     VerticalAlignment="Center"
+                                     Margin="10"
+                                     Width="30"
+                                     Height="30"/>
+
+        </Grid>
     </Grid>
 </Window>
