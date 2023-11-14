@@ -14,7 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace ThermoCouple {
+namespace ThermoCouple.MVVM.View {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -115,7 +115,7 @@ namespace ThermoCouple {
         }
         #endregion
 
-        private void Grid_MouseDown(object sender, MouseButtonEventArgs e) {
+        private void Border_MouseDown(object sender, MouseButtonEventArgs e) {
             if (e.LeftButton == MouseButtonState.Pressed) {
                 DragMove();
             }
