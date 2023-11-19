@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:ThermoCouple.MVVM.View"
+        xmlns:local="clr-namespace:ThermoCouple.MVVM.ViewModel"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" xmlns:viewmodel="clr-namespace:ThermoCouple.MVVM.ViewModel"
         xmlns:ScottPlot="clr-namespace:ScottPlot;assembly=ScottPlot.WPF"
         mc:Ignorable="d"
@@ -104,6 +104,9 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
+            <Grid.DataContext>
+                <local:ConnectionVM/>
+            </Grid.DataContext>
 
             <materialDesign:Card Background="Lavender"
                                  Margin="5"
@@ -130,17 +133,20 @@
                         VerticalAlignment="Bottom"
                         Margin="10">
 
+                <TextBlock VerticalAlignment="Bottom"
+                           Text="{Binding Error}"/>
+
                 <Button x:Name="RefreshButton"
                         VerticalAlignment="Bottom"
                         Content="Refresh"
-                        Click="RefreshButton_Click"
+                        Command="{Binding RefreshPortList}"
                         Style="{StaticResource MaterialDesignOutlinedButton}"/>
 
                 <Button Margin="0,10,0,0"
                         x:Name="ConnectButton"
                         VerticalAlignment="Bottom"
                         Content="Connect"
-                        Click="ConnectButton_Click"/>
+                        Command="{Binding ConnectToPort}"/>
             </StackPanel>
         </Grid>
 

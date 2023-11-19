@@ -13,6 +13,7 @@ namespace ThermoCouple.MVVM.Model {
         private bool IsConnected { get; set; }
         public IList<string> SerialPortsList { get; set; }
         public SerialPort serialPort { get; set; }
+        public string ErrorMessage { get; set; }
 
         public ConnectionM() {
             SerialPortsList = new List<string>();
@@ -40,8 +41,7 @@ namespace ThermoCouple.MVVM.Model {
             IsArduino = false;
 
             try {
-                string currentPortName = "COM5"; /////// Поменять на значение из view
-                serialPort = new SerialPort(currentPortName, 9600);
+                serialPort = new SerialPort(serialPort.PortName, 9600);
 
                 await Task.Run(() => serialPort.Open());
 
@@ -53,7 +53,7 @@ namespace ThermoCouple.MVVM.Model {
                     IsConnected = false;
                 }
             } catch (Exception exc) {
-                MessageBox.Show(exc.Message); /// Переслать во view
+                this.ErrorMessage = exc.Message;
             }
         }
 
@@ -72,7 +72,7 @@ namespace ThermoCouple.MVVM.Model {
                         IsArduino = false;
                     }
                 } catch (Exception exc) {
-                    MessageBox.Show(exc.Message); /// Переслать во view
+                    this.ErrorMessage = exc.Message; /// Переслать во view
                 }
             });
         }

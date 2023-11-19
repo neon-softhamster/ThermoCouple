@@ -24,7 +24,6 @@ namespace ThermoCouple.MVVM.View {
 
         public MainWindow() {
             InitializeComponent();
-            ConnectionGrid.DataContext = new MVVM.ViewModel.ConnectionVM();
 
             // scan ports and add to list
             // InitializePorts();
