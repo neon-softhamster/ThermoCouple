@@ -5,19 +5,25 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using ThermoCouple.MVVM.ViewModel;
 
 namespace ThermoCouple.MVVM.Model {
-    public class ConnectionModel {
-        public bool IsArduino { get; set; }
-        public bool IsConnected { get; set; }
-        public List<string> SerialPortsList { get; set; }
+    public class ConnectionM {
+        private bool IsArduino { get; set; }
+        private bool IsConnected { get; set; }
+        public IList<string> SerialPortsList { get; set; }
+        public SerialPort serialPort { get; set; }
 
-        public SerialPort serialPort;
+        public ConnectionM() {
+            SerialPortsList = new List<string>();
+            serialPort = new SerialPort();
+            InitializePorts();
+            serialPort.PortName = SerialPortsList[0];
+        }
 
         // method to fill box with ports
         public void InitializePorts() {
-            string[] SerialPortsToCheck;
-            SerialPortsToCheck = SerialPort.GetPortNames();
+            string[] SerialPortsToCheck = SerialPort.GetPortNames();
             if (SerialPortsToCheck.Count() != 0) {
                 foreach (string serial in SerialPortsToCheck) {
                     // if the serial is not yet inside the combobox -> add a serial port name to combo box

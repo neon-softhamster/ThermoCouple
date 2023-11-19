@@ -24,12 +24,14 @@ namespace ThermoCouple.MVVM.View {
 
         public MainWindow() {
             InitializeComponent();
+            ConnectionGrid.DataContext = new MVVM.ViewModel.ConnectionVM();
 
             // scan ports and add to list
-            InitializePorts();
+            // InitializePorts();
         }
 
         // method to fill box with ports
+        
         public void InitializePorts() {
             serialPorts = SerialPort.GetPortNames();
             if (serialPorts.Count() != 0) {
@@ -44,6 +46,7 @@ namespace ThermoCouple.MVVM.View {
                 ComPortsBox.SelectedItem = serialPorts[0];
             }
         }
+        
 
         #region WPF to Arduino connection
         private void ConnectButton_Click(object sender, RoutedEventArgs e) {
@@ -109,7 +112,7 @@ namespace ThermoCouple.MVVM.View {
                 }
             });
         }
-
+        
         private void RefreshButton_Click(object sender, RoutedEventArgs e) {
             InitializePorts();
         }
