@@ -146,8 +146,9 @@
                 <Button Margin="0,10,0,0"
                         x:Name="ConnectButton"
                         VerticalAlignment="Bottom"
-                        Content="{Binding ConnectOrDisconnect}"
-                        Command="{Binding ConnectToPort}"/>
+                        Content="{Binding ConnectButtonText}"
+                        Command="{Binding ConnectToPort}"
+                        IsEnabled="{Binding ConnectButtonAvaliability}"/>
             </StackPanel>
         </Grid>
 

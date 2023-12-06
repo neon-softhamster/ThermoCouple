@@ -18,8 +18,7 @@ namespace ThermoCouple.MVVM.Model {
 
         public bool IsConnected { get => isConnected; }
         public List<string> SerialPortsList { get => serialPortsList; }
-        public SerialPort SerialPort { 
-            get => serialPort; 
+        public SerialPort SerialPort { get => serialPort; 
             set {
                 if (isConnected == true) {
                     serialPort.Close();
@@ -43,11 +42,11 @@ namespace ThermoCouple.MVVM.Model {
             serialPortsList.Clear();
             serialPortsList.AddRange(SerialPort.GetPortNames());
             serialPortsList.Sort();
-            serialPort.PortName = serialPortsList[0];
         }
 
         // Подключение к порту и проверка на ардуину
         public async void ConnectToArduinoAsync() {
+            DisconnectFromArduino();
             isConnected = false;
             isArduino = false;
 

@@ -17,6 +17,8 @@ namespace ThermoCouple.MVVM.ViewModel {
             connection = new ConnectionM();
             Ports = connection.SerialPortsList;
             CurrentPort = connection.SerialPort.PortName;
+            ConnectButtonText = "Connect";
+            ConnectButtonAvaliability = true;
             isConnected = connection.IsConnected;
 
             RefreshPortList = new RefreshPortListC(this);
@@ -28,17 +30,13 @@ namespace ThermoCouple.MVVM.ViewModel {
         private string _currentPort;
         private string _errorMessage;
         private bool isConnected;
+        private bool connectButtonAvaliability;
+        private string connectButtonText;
         private ConnectionM connection;
 
         // Команды
         public ICommand RefreshPortList { get; }
         public ICommand ConnectToPort { get; }
-
-        // Свойства
-        public ConnectionM Connection {
-            get { return connection; }
-            set { connection = value; }
-        }
 
         public void RefreshPorts() {
             connection.InitializePorts();
@@ -49,9 +47,20 @@ namespace ThermoCouple.MVVM.ViewModel {
         public void Connect() {
             if (isConnected) {
                 connection.DisconnectFromArduino();
+                isConnected = false;
+                ConnectButtonText = "Connect";
             } else {
+                connection.SerialPort.PortName = _currentPort;
                 connection.ConnectToArduinoAsync();
+                ConnectButtonText = "Connection...";
+                ConnectButtonAvaliability = false;
             }
+        }
+
+        // Свойства
+        public ConnectionM Connection {
+            get => connection; 
+            set => connection = value;
         }
 
         public IList<string> Ports {
@@ -66,7 +75,6 @@ namespace ThermoCouple.MVVM.ViewModel {
             get { return _currentPort; }
             set { 
                 _currentPort = value;
-                connection.SerialPort.PortName = value;
                 OnPropertyChanged("CurrentPort");
             }
         }
@@ -78,17 +86,19 @@ namespace ThermoCouple.MVVM.ViewModel {
             }
         }
 
-        public string ConnectOrDisconnect {
-            get {
-                if (!connection.IsConnected) {
-                    return "Connect";
-                } else {
-                    return "Disconnect";
-                }
+        public string ConnectButtonText {
+            get { return connectButtonText; }
+            set {
+                connectButtonText = value;
+                OnPropertyChanged(nameof(ConnectButtonText));
             }
-            set { 
-                isConnected = connection.IsConnected;
-                OnPropertyChanged("ConnectOrDisconnect");
+        }
+
+        public bool ConnectButtonAvaliability {
+            get { return connectButtonAvaliability; }
+            set {
+                connectButtonAvaliability = value;
+                OnPropertyChanged(nameof(ConnectButtonAvaliability));
             }
         }
     }

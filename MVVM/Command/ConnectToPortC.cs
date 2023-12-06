@@ -21,8 +21,10 @@ namespace ThermoCouple.MVVM.Command {
         }
 
         public void Execute(object parameter) {
-            if (CanExecute(parameter))
+            if (CanExecute(parameter)) {
                 viewModel.Connect();
+                Console.WriteLine("ConnectToPortC command goes");
+            }
         }
     }
 }

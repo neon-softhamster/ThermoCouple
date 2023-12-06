@@ -9,10 +9,10 @@ using ThermoCouple.MVVM.ViewModel;
 namespace ThermoCouple.MVVM.Command {
     public class RefreshPortListC : ICommand {
         public event EventHandler CanExecuteChanged;
-        ConnectionVM _viewModel;
+        ConnectionVM viewModel;
 
         public RefreshPortListC(ConnectionVM vM) {
-            _viewModel = vM;
+            viewModel = vM;
         }
 
         public bool CanExecute(object parameter) {
@@ -21,8 +21,8 @@ namespace ThermoCouple.MVVM.Command {
 
         public void Execute(object parameter) {
             if (CanExecute(parameter)) {
-                _viewModel.RefreshPorts();
-                Console.WriteLine("Refresh goes");
+                viewModel.RefreshPorts();
+                Console.WriteLine("RefreshPortListC command goes");
             }
         }
     }
