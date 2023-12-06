@@ -6,8 +6,8 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ThermoCouple.MVVM.ViewModel {
-    public class BaseVM : INotifyPropertyChanged {
+namespace ThermoCouple.MVVM.Model {
+    public class BaseM : INotifyPropertyChanged {
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected void OnPropertyChanged([CallerMemberName] string prop = "") {

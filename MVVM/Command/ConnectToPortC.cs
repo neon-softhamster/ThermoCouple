@@ -9,10 +9,11 @@ using ThermoCouple.MVVM.ViewModel;
 namespace ThermoCouple.MVVM.Command {
     internal class ConnectToPortC : ICommand {
         public event EventHandler CanExecuteChanged;
-        ConnectionVM _viewModel;
+
+        ConnectionVM viewModel;
 
         public ConnectToPortC(ConnectionVM vM) {
-            _viewModel = vM;
+            viewModel = vM;
         }
 
         public bool CanExecute(object parameter) {
@@ -21,8 +22,7 @@ namespace ThermoCouple.MVVM.Command {
 
         public void Execute(object parameter) {
             if (CanExecute(parameter))
-                _viewModel._connection.ConnectToArduinoAsync();
-            Console.WriteLine("BBBBBBBBBBBBB");
+                viewModel.Connect();
         }
     }
 }

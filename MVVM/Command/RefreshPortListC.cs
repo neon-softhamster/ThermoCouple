@@ -20,9 +20,10 @@ namespace ThermoCouple.MVVM.Command {
         }
 
         public void Execute(object parameter) {
-            if (CanExecute(parameter))
-                _viewModel._connection.InitializePorts();
-            Console.WriteLine("AAAAAAAAAA");
+            if (CanExecute(parameter)) {
+                _viewModel.RefreshPorts();
+                Console.WriteLine("Refresh goes");
+            }
         }
     }
 }

@@ -9,43 +9,87 @@ using System.Windows;
 using System.Windows.Input;
 using ThermoCouple.MVVM.Model;
 using ThermoCouple.MVVM.Command;
+using System.Data.Common;
 
 namespace ThermoCouple.MVVM.ViewModel {
     public class ConnectionVM : BaseVM {
-        // Свойства
-        private IList<string> _portList;
-        private string _currentPort;
-        private string _errorMessage;
-        public ConnectionM _connection;
-        // Команды
-        public ICommand RefreshPortList { get; }
-        public ICommand ConnectToPort { get; }
+        public ConnectionVM() {
+            connection = new ConnectionM();
+            Ports = connection.SerialPortsList;
+            CurrentPort = connection.SerialPort.PortName;
+            isConnected = connection.IsConnected;
 
-        // Конструктор
-        public ConnectionVM()
-        {
-            _connection = new ConnectionM();
-            _portList = _connection.SerialPortsList;
-            _currentPort = _connection.serialPort.PortName;
-            _errorMessage = _connection.ErrorMessage;
-
-            // Команды
             RefreshPortList = new RefreshPortListC(this);
             ConnectToPort = new ConnectToPortC(this);
         }
 
+        // Поля
+        private IList<string> _portList;
+        private string _currentPort;
+        private string _errorMessage;
+        private bool isConnected;
+        private ConnectionM connection;
+
+        // Команды
+        public ICommand RefreshPortList { get; }
+        public ICommand ConnectToPort { get; }
+
+        // Свойства
+        public ConnectionM Connection {
+            get { return connection; }
+            set { connection = value; }
+        }
+
+        public void RefreshPorts() {
+            connection.InitializePorts();
+            Ports = connection.SerialPortsList;
+            CurrentPort = connection.SerialPortsList[0];
+        }
+
+        public void Connect() {
+            if (isConnected) {
+                connection.DisconnectFromArduino();
+            } else {
+                connection.ConnectToArduinoAsync();
+            }
+        }
+
         public IList<string> Ports {
             get { return _portList; }
+            set { 
+                _portList = value;
+                OnPropertyChanged(nameof(Ports));
+                Console.WriteLine("Ports are being updated");
+            }
         }
         public string CurrentPort { 
             get { return _currentPort; }
             set { 
                 _currentPort = value;
-                _connection.serialPort.PortName = value;
+                connection.SerialPort.PortName = value;
+                OnPropertyChanged("CurrentPort");
             }
         }
         public string Error {
             get { return _errorMessage; }
+            set { 
+                _errorMessage = value;
+                OnPropertyChanged("Error");
+            }
+        }
+
+        public string ConnectOrDisconnect {
+            get {
+                if (!connection.IsConnected) {
+                    return "Connect";
+                } else {
+                    return "Disconnect";
+                }
+            }
+            set { 
+                isConnected = connection.IsConnected;
+                OnPropertyChanged("ConnectOrDisconnect");
+            }
         }
     }
 }

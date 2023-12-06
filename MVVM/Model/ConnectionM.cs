@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ScottPlot.Renderable;
+using System;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
@@ -9,36 +10,46 @@ using ThermoCouple.MVVM.ViewModel;
 
 namespace ThermoCouple.MVVM.Model {
     public class ConnectionM {
-        private bool IsArduino { get; set; }
-        private bool IsConnected { get; set; }
-        public IList<string> SerialPortsList { get; set; }
-        public SerialPort serialPort { get; set; }
-        public string ErrorMessage { get; set; }
+        private bool isArduino;
+        private bool isConnected;
+        private string errorMessage;
+        private List<string> serialPortsList;
+        private SerialPort serialPort;
 
-        public ConnectionM() {
-            SerialPortsList = new List<string>();
-            serialPort = new SerialPort();
-            InitializePorts();
-            serialPort.PortName = SerialPortsList[0];
-        }
-
-        // method to fill box with ports
-        public void InitializePorts() {
-            string[] SerialPortsToCheck = SerialPort.GetPortNames();
-            if (SerialPortsToCheck.Count() != 0) {
-                foreach (string serial in SerialPortsToCheck) {
-                    // if the serial is not yet inside the combobox -> add a serial port name to combo box
-                    if (!SerialPortsList.Contains(serial)) {
-                        SerialPortsList.Add(serial);
-                    }
+        public bool IsConnected { get => isConnected; }
+        public List<string> SerialPortsList { get => serialPortsList; }
+        public SerialPort SerialPort { 
+            get => serialPort; 
+            set {
+                if (isConnected == true) {
+                    serialPort.Close();
+                    DisconnectFromArduino();
+                } else {
+                    DisconnectFromArduino();
                 }
             }
+        }
+        public string ErrorMessage { get => errorMessage; }
+
+        public ConnectionM() {
+            isConnected = false;
+            serialPortsList = new List<string>();
+            serialPort = new SerialPort();
+            InitializePorts();
+        }
+
+        // method to fill list with ports
+        public void InitializePorts() {
+            serialPortsList.Clear();
+            serialPortsList.AddRange(SerialPort.GetPortNames());
+            serialPortsList.Sort();
+            serialPort.PortName = serialPortsList[0];
         }
 
         // Подключение к порту и проверка на ардуину
         public async void ConnectToArduinoAsync() {
-            IsConnected = false;
-            IsArduino = false;
+            isConnected = false;
+            isArduino = false;
 
             try {
                 serialPort = new SerialPort(serialPort.PortName, 9600);
@@ -47,13 +58,15 @@ namespace ThermoCouple.MVVM.Model {
 
                 await CheckIfIsArduinoPortAsync();
 
-                if (IsArduino) {
-                    IsConnected = true;
+                if (isArduino) {
+                    isConnected = true;
+                    Console.WriteLine("Arduino found");
                 } else {
-                    IsConnected = false;
+                    isConnected = false;
+                    Console.WriteLine("Arduino not found");
                 }
             } catch (Exception exc) {
-                this.ErrorMessage = exc.Message;
+                errorMessage = exc.Message;
             }
         }
 
@@ -67,14 +80,21 @@ namespace ThermoCouple.MVVM.Model {
                     serialPort.Write("r");
                     string answer = serialPort.ReadLine();
                     if (answer == "Salve\r") {
-                        IsArduino = true;
+                        isArduino = true;
                     } else {
-                        IsArduino = false;
+                        isArduino = false;
                     }
                 } catch (Exception exc) {
-                    this.ErrorMessage = exc.Message; /// Переслать во view
+                    errorMessage = exc.Message; /// Переслать во view
                 }
             });
+        }
+
+        public void DisconnectFromArduino() {
+            isConnected = false;
+            if (serialPort.IsOpen) {
+                serialPort.Close();
+            }
         }
     }
 }
