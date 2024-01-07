@@ -4,15 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using ThermoCouple.MVVM.ViewModel;
 
 namespace ThermoCouple.MVVM.Command {
-    internal class ConnectToPortC : ICommand {
+    public class StartDataWritingC : ICommand {
         public event EventHandler CanExecuteChanged;
-
         ViewModel.ViewModel viewModel;
 
-        public ConnectToPortC(ViewModel.ViewModel vM) {
+        public StartDataWritingC(ViewModel.ViewModel vM) {
             viewModel = vM;
         }
 
@@ -22,8 +20,8 @@ namespace ThermoCouple.MVVM.Command {
 
         public void Execute(object parameter) {
             if (CanExecute(parameter)) {
-                viewModel.Connect();
-                Console.WriteLine("ConnectToPortC command goes");
+                viewModel.WriteData();
+                Console.WriteLine("StartDataWritingC command goes");
             }
         }
     }
