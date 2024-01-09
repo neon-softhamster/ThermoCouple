@@ -59,6 +59,11 @@ namespace ThermoCouple.MVVM.Model {
             set => pathToWrite = value;
         }
 
+        public double Dt {
+            get => dt;
+            set => dt = value;
+        }
+
         // Конструктор
         public Driver() {
             isConnected = false;
@@ -135,7 +140,7 @@ namespace ThermoCouple.MVVM.Model {
             }
         }
 
-        // Сообщение об ошибке
+        // Сообщение об ошибке в длог
         public void DebugMessage(string message) {
             Console.WriteLine(message);
             try {
@@ -147,6 +152,21 @@ namespace ThermoCouple.MVVM.Model {
             }
         }
 
+        public void TransmitCommand(string type, double value) {
+            if (isArduino)
+                switch (type) {
+                    case "frequency":
+                        serialPort.WriteLine("f" + Math.Round(value * 1000).ToString());
+                        break;
+                    case "noise":
+                        serialPort.WriteLine("n" + value.ToString());
+                        break;
+                    case "brigthness":
+                        serialPort.WriteLine("b" + value.ToString());
+                        break;
+                }
+        }
+
         // Поток ком порта
         private void SerialPort_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e) {
             string incomeMessage = serialPort.ReadLine();
@@ -156,9 +176,14 @@ namespace ThermoCouple.MVVM.Model {
         private delegate void LineReceivedEvent(string incomeMessage);
 
         private void LineReceived(string incomeMessage) {
-            currentTemperature = incomeMessage.ToString().Remove(5);
-            dataModel.AddNewMeasurement(currentTemperature);
-            OnPropertyChanged(nameof(currentTemperature));
+            try {
+                currentTemperature = incomeMessage.ToString().Remove(5);
+                dataModel.AddNewMeasurement(currentTemperature);
+                OnPropertyChanged(nameof(currentTemperature));
+            } catch {
+                errorMessage = "Wrong signal from sensor";
+                OnPropertyChanged(nameof(errorMessage));
+            }
 
             // запись данных
             if (needToWrite) {
@@ -168,6 +193,7 @@ namespace ThermoCouple.MVVM.Model {
                     timer += dt;
                     sw.Close();
                 } catch (Exception exc) {
+                    DebugMessage("°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°");
                     MessageBox.Show(exc.Message);
                 }
             }

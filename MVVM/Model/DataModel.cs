@@ -34,7 +34,7 @@ namespace ThermoCouple.MVVM.Model {
             measurements[0] = double.Parse(newMeasurement, System.Globalization.CultureInfo.InvariantCulture);
 
             for (int i = bufferMaxSize - 2; i >= 0; i -= 1) {
-                time[i + 1] = time[i] + dt;
+                time[i + 1] = time[i] - dt;
             }
             time[0] = 0;
         }

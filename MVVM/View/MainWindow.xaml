@@ -108,78 +108,88 @@
                                  Grid.Row="0"
                                  Margin="5"
                                  IsEnabled="{Binding MainPanelAvaliability}">
+
                 <TabControl
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Top"
-                    materialDesign:NavigationRailAssist.ShowSelectionBackground="True"
-                    SnapsToDevicePixels="False"
-                    Style="{StaticResource MaterialDesignNavigationRailTabControl}"
-                    TabStripPlacement="Top"
-                    materialDesign:ColorZoneAssist.Mode="Dark">
-                    <TabItem
-                        Height="40"
-                        Width="100">
+                Grid.Row="0"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Top"
+                materialDesign:NavigationRailAssist.ShowSelectionBackground="True"
+                SnapsToDevicePixels="False"
+                Style="{StaticResource MaterialDesignNavigationRailTabControl}"
+                TabStripPlacement="Top"
+                materialDesign:ColorZoneAssist.Mode="Dark">
+                    <TabItem 
+                    x:Name="MonitorTab"
+                    Height="40"
+                    Width="100"
+                    VerticalAlignment="Stretch">
                         <TabItem.Header>
                             <StackPanel
-                                Orientation="Horizontal">
+                            Orientation="Horizontal">
                                 <materialDesign:PackIcon
-                                    Width="24"
-                                    Height="24"
-                                    VerticalAlignment="Center"
-                                    Kind="MonitorEye" />
+                                Width="24"
+                                Height="24"
+                                VerticalAlignment="Center"
+                                Kind="MonitorEye" />
                                 <TextBlock
-                                    VerticalAlignment="Center"
-                                    Text="  Monitor"/>
+                                VerticalAlignment="Center"
+                                Text="  Monitor"/>
                             </StackPanel>
                         </TabItem.Header>
-                        <StackPanel>
+                        <StackPanel
+                        VerticalAlignment="Stretch">
                             <Grid x:Name="TemperatureStateIndicator">
                                 <TextBlock Grid.Row="0"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"
-                                           FontWeight="Bold"
-                                           FontSize="20"
-                                           Text="{Binding Path=CurrentTemperature}"/>
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        FontWeight="Bold"
+                                        FontSize="20"
+                                        Text="{Binding Path=CurrentTemperature}"/>
 
                                 <materialDesign:PackIcon Kind="ThermometerCheck"
-                                                         HorizontalAlignment="Right"
-                                                         VerticalAlignment="Center"
-                                                         Margin="10"
-                                                         Width="30"
-                                                         Height="30"/>
+                                                        HorizontalAlignment="Right"
+                                                        VerticalAlignment="Center"
+                                                        Margin="10"
+                                                        Width="30"
+                                                        Height="30"/>
                             </Grid>
 
-                            <ContentControl Content="{Binding TemperatureGraph}"/>
+                            <ContentControl 
+                                Margin="5"
+                                VerticalAlignment="Stretch"
+                                Content="{Binding TemperatureGraph}"/>
                         </StackPanel>
                     </TabItem>
-                    <TabItem
-                        Height="40"
-                        Width="100">
+                    <TabItem 
+                    x:Name="WriteTab"
+                    Height="40"
+                    Width="100"
+                    VerticalAlignment="Stretch">
                         <TabItem.Header>
                             <StackPanel
-                                Orientation="Horizontal">
+                            Orientation="Horizontal">
                                 <materialDesign:PackIcon
-                                    Width="24"
-                                    Height="24"
-                                    VerticalAlignment="Center"
-                                    Kind="ContentSaveEditOutline"/>
+                                Width="24"
+                                Height="24"
+                                VerticalAlignment="Center"
+                                Kind="ContentSaveEditOutline"/>
                                 <TextBlock
-                                    VerticalAlignment="Center"
-                                    Text="  Write"/>
+                                VerticalAlignment="Center"
+                                Text="  Write"/>
                             </StackPanel>
                         </TabItem.Header>
                         <Grid
-                            VerticalAlignment="Stretch">
+                        VerticalAlignment="Stretch">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="*"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
-                            
+
                             <Grid 
-                                VerticalAlignment="Top"
-                                Grid.Row="0"
-                                Margin="5"
-                                Background="#C9E5E5">
+                            VerticalAlignment="Top"
+                            Grid.Row="0"
+                            Margin="5"
+                            Background="#C9E5E5">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="*"/>
                                     <RowDefinition Height="*"/>
@@ -190,77 +200,70 @@
                                 </Grid.ColumnDefinitions>
 
                                 <TextBlock 
-                                    Grid.ColumnSpan="2"
-                                    Text="Where to write data?"
-                                    Margin="10,10,5,0"
-                                    FontSize="16"
-                                    HorizontalAlignment="Left"
-                                    Grid.Row="0"
-                                    Grid.Column="0"/>
+                                Grid.ColumnSpan="2"
+                                Text="Where to write data?"
+                                Margin="10,10,5,0"
+                                FontSize="16"
+                                HorizontalAlignment="Left"
+                                Grid.Row="0"
+                                Grid.Column="0"/>
 
                                 <TextBox 
-                                    x:Name="dataPath"
-                                    Margin="10,5,5,10"
-                                    Grid.Row="1"
-                                    Grid.Column="0"
-                                    Text="{Binding DataPath}"/>
+                                x:Name="dataPath"
+                                Margin="10,5,5,10"
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                Text="{Binding DataPath}"/>
 
                                 <Button 
-                                    x:Name="OpenFileDialogButton"
-                                    Margin="10,5,5,10"
-                                    Grid.Row="1"
-                                    Grid.Column="1"
-                                    Content="Select path"
-                                    FontSize="16"
-                                    Style="{StaticResource MaterialDesignOutlinedButton}"/>
-                            </Grid>
-                            
-                            <StackPanel
+                                x:Name="OpenFileDialogButton"
+                                Margin="10,5,5,10"
                                 Grid.Row="1"
-                                Margin="5"
+                                Grid.Column="1"
+                                Content="Select path"
+                                FontSize="16"
+                                Style="{StaticResource MaterialDesignOutlinedButton}"/>
+                            </Grid>
+
+                            <StackPanel
+                            Grid.Row="1"
+                            Margin="5"
+                            VerticalAlignment="Bottom"
+                            HorizontalAlignment="Right"
+                            Orientation="Horizontal">
+                                <Button
+                                Width="150"
+                                x:Name="startDataLogButton"
                                 VerticalAlignment="Bottom"
-                                HorizontalAlignment="Right"
-                                Orientation="Horizontal">
-                                <Button
-                                    Width="80"
-                                    x:Name="stopDataLogButton"
-                                    VerticalAlignment="Bottom"
-                                    Margin="10,10,5,10"
-                                    Command="{Binding LogData}"
-                                    Style="{DynamicResource MaterialDesignOutlinedDarkButton}"
-                                    Content="Stop"/>
-                                <Button
-                                    Width="80"
-                                    x:Name="startDataLogButton"
-                                    VerticalAlignment="Bottom"
-                                    Margin="10,10,5,10"
-                                    Command="{Binding LogData}"
-                                    Style="{DynamicResource MaterialDesignOutlinedDarkButton}"
-                                    Content="Start"/>
+                                Margin="10,10,5,10"
+                                Command="{Binding LogData}"
+                                Style="{DynamicResource MaterialDesignOutlinedDarkButton}"
+                                Content="{Binding DataLoggerButtonText}"/>
                             </StackPanel>
                         </Grid>
-                        
+
                     </TabItem>
-                    <TabItem
-                        Height="40"
-                        Width="100">
+                    <TabItem 
+                    x:Name="SettingsTab"
+                    Height="40"
+                    Width="100">
                         <TabItem.Header>
                             <StackPanel
-                                Orientation="Horizontal">
+                            Orientation="Horizontal">
                                 <materialDesign:PackIcon
-                                    Width="24"
-                                    Height="24"
-                                    VerticalAlignment="Center"
-                                    Kind="CogOutline"/>
+                                Width="24"
+                                Height="24"
+                                VerticalAlignment="Center"
+                                Kind="CogOutline"/>
                                 <TextBlock
-                                    VerticalAlignment="Center"
-                                    Text="  Settings"/>
+                                VerticalAlignment="Center"
+                                Text="  Settings"/>
                             </StackPanel>
                         </TabItem.Header>
                         <StackPanel>
                             <Grid 
-                                Margin="5"
-                                Background="#C9E5E5">
+                            Margin="5"
+                            Background="#C9E5E5">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="40"/>
                                     <RowDefinition Height="40"/>
@@ -275,119 +278,109 @@
                                 </Grid.ColumnDefinitions>
 
                                 <TextBlock
-                                    Grid.Row="0"
-                                    Margin="10,5,10,5"
-                                    Text="Noise supression level"
-                                    VerticalAlignment="Center"
-                                    FontSize="16"/>
+                                Grid.Row="0"
+                                Margin="10,5,10,5"
+                                Text="Noise supression level"
+                                VerticalAlignment="Center"
+                                FontSize="16"/>
 
                                 <TextBlock
-                                    Grid.Row="1"
-                                    Margin="10,5,10,5"
-                                    Text="Sensor polling period, s"
-                                    VerticalAlignment="Center"
-                                    FontSize="16"/>
+                                Grid.Row="1"
+                                Margin="10,5,10,5"
+                                Text="Sensor polling period, s"
+                                VerticalAlignment="Center"
+                                FontSize="16"/>
 
                                 <TextBlock
-                                    Grid.Row="2"
-                                    Margin="10,5,10,5"
-                                    Text="Screen brightness"
-                                    VerticalAlignment="Center"
-                                    FontSize="16"/>
+                                Grid.Row="2"
+                                Margin="10,5,10,5"
+                                Text="Screen brightness"
+                                VerticalAlignment="Center"
+                                FontSize="16"/>
 
                                 <TextBlock
-                                    Grid.Row="3"
-                                    Margin="10,5,10,5"
-                                    Text="Display mode"
-                                    VerticalAlignment="Center"
-                                    FontSize="16"/>
-                                
+                                Grid.Row="3"
+                                Margin="10,5,10,5"
+                                Text="Display mode"
+                                VerticalAlignment="Center"
+                                FontSize="16"/>
+
                                 <TextBlock
-                                    Grid.Row="4"
-                                    Margin="10,5,10,5"
-                                    Text="Temperature stability criterion"
-                                    VerticalAlignment="Center"
-                                    FontSize="16"/>
+                                Grid.Row="4"
+                                Margin="10,5,10,5"
+                                Text="Temperature stability criterion, °C/min"
+                                VerticalAlignment="Center"
+                                FontSize="16"/>
 
                                 <ComboBox
-                                    x:Name="NoiseSelector"
-                                    Margin="5,0,5,0"
-                                    Grid.Column="1"
-                                    Grid.Row="0"
-                                    materialDesign:HintAssist.Hint="Select">
-                                    <ComboBoxItem>0</ComboBoxItem>
-                                    <ComboBoxItem>0.5</ComboBoxItem>
-                                    <ComboBoxItem>1.0</ComboBoxItem>
-                                    <ComboBoxItem>1.5</ComboBoxItem>
-                                    <ComboBoxItem>2.0</ComboBoxItem>
-                                </ComboBox>
+                                x:Name="NoiseSelector"
+                                Margin="5,0,5,0"
+                                Grid.Column="2"
+                                Grid.Row="0"
+                                materialDesign:HintAssist.Hint="Select"
+                                ItemsSource="{Binding NoiseList}"
+                                SelectedItem="{Binding SelectedNoise}"/>
 
                                 <ComboBox
-                                    x:Name="FreqSelector"
-                                    Margin="5,0,5,0"
-                                    Grid.Column="1"
-                                    Grid.Row="1"
-                                    materialDesign:HintAssist.Hint="Select">
-                                    <ComboBoxItem>0.5</ComboBoxItem>
-                                    <ComboBoxItem>0.75</ComboBoxItem>
-                                    <ComboBoxItem>1</ComboBoxItem>
-                                    <ComboBoxItem>2</ComboBoxItem>
-                                    <ComboBoxItem>5</ComboBoxItem>
-                                </ComboBox>
+                                x:Name="FreqSelector"
+                                Margin="5,0,5,0"
+                                Grid.Column="2"
+                                Grid.Row="1"
+                                materialDesign:HintAssist.Hint="Select"
+                                ItemsSource="{Binding FrequencyList}"
+                                SelectedItem="{Binding SelectedFrequency}"/>
 
                                 <ComboBox
-                                    x:Name="BrightnessSelector"
-                                    Margin="5,0,5,0"
-                                    Grid.Column="1"
-                                    Grid.Row="2"
-                                    materialDesign:HintAssist.Hint="Select">
-                                    <ComboBoxItem>0</ComboBoxItem>
-                                    <ComboBoxItem>1</ComboBoxItem>
-                                    <ComboBoxItem>2</ComboBoxItem>
-                                    <ComboBoxItem>3</ComboBoxItem>
-                                    <ComboBoxItem>4</ComboBoxItem>
-                                    <ComboBoxItem>5</ComboBoxItem>
-                                    <ComboBoxItem>6</ComboBoxItem>
-                                </ComboBox>
+                                x:Name="BrightnessSelector"
+                                Margin="5,0,5,0"
+                                Grid.Column="2"
+                                Grid.Row="2"
+                                materialDesign:HintAssist.Hint="Select"
+                                ItemsSource="{Binding BrightnessList}"
+                                SelectedItem="{Binding SelectedBrightness}"/>
 
                                 <TextBox
-                                    Margin="5,5,5,5"
-                                    Grid.Column="1"
-                                    Grid.Row="5"
-                                    materialDesign:HintAssist.Hint="Write"/>
+                                Margin="5,5,5,5"
+                                Grid.Column="2"
+                                Grid.Row="5"
+                                materialDesign:HintAssist.Hint="Write"/>
 
                                 <Button x:Name="RoundDisplayModeButton"
-                                        Margin="5,2,5,5"
-                                        Grid.Row="3"
-                                        Grid.Column="1"
-                                        Content="Round"
-                                        FontSize="16"
-                                        Style="{StaticResource MaterialDesignOutlinedButton}"/>
+                                    Margin="5,2,5,5"
+                                    Grid.Row="3"
+                                    Grid.Column="1"
+                                    Content="Round"
+                                    FontSize="16"
+                                    Style="{StaticResource MaterialDesignOutlinedButton}"/>
 
                                 <Button x:Name="DecimalDisplayModeButton"
-                                        Margin="5,2,5,5"
-                                        Grid.Row="3"
-                                        Grid.Column="2"
-                                        Content="Decimal"
-                                        FontSize="16"
-                                        Style="{StaticResource MaterialDesignOutlinedButton}"/>
+                                    Margin="5,2,5,5"
+                                    Grid.Row="3"
+                                    Grid.Column="2"
+                                    Content="Decimal"
+                                    FontSize="16"
+                                    Style="{StaticResource MaterialDesignOutlinedButton}"/>
 
                             </Grid>
                         </StackPanel>
                     </TabItem>
                 </TabControl>
+
             </materialDesign:Card>
 
             <materialDesign:Card x:Name="StatusPanel"
                                  Grid.Row="1"
                                  Margin="5"
                                  Background="PeachPuff">
+
                 <TextBlock
+                    Grid.Row="1"
                     VerticalAlignment="Center"
                     Margin="10"
                     FontSize="16"
                     Text="{Binding Status}"/>
             </materialDesign:Card>
+
         </Grid>
     </Grid>
 </Window>
