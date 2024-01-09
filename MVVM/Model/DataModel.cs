@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ThermoCouple.MVVM.Model {
     public class DataModel {
-        const int bufferMaxSize = 1000; // максимально допустимый размер буфера с данными
+        const int bufferMaxSize = 100; // максимально допустимый размер буфера с данными
         double[] time = new double[bufferMaxSize];
         double[] measurements = new double[bufferMaxSize];
         double dt; // интервал времени

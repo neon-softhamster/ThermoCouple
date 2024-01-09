@@ -53,7 +53,7 @@ namespace ThermoCouple.MVVM.ViewModel {
             isConnected = thermoCoupleDriver.IsConnected;
             CurrentTemperature = "No data yet";
             MainPanelAvaliability = false;
-            DataPath = System.AppDomain.CurrentDomain.BaseDirectory + "thermal_data.txt";
+            DataPath = System.AppDomain.CurrentDomain.BaseDirectory + "thermal_data";
             Status = "Status: Please connect the sensor to receive data";
 
             RefreshPortList = new RefreshPortListC(this);
@@ -64,7 +64,7 @@ namespace ThermoCouple.MVVM.ViewModel {
             plot.MinHeight = 350;
             logger = plot.Plot.AddDataLogger();
             logger.ViewFull();
-            plot.Plot.XAxis.Label("Seconds from the beginning, s", size: 16);
+            plot.Plot.XAxis.Label("Minutes from the beginning, s", size: 16);
             plot.Plot.YAxis.Label("Temperature, °C", size: 16);
             plot.Plot.Title("Temperature on time", size: 20);
             plot.Refresh();
@@ -97,8 +97,7 @@ namespace ThermoCouple.MVVM.ViewModel {
                 case "currentTemperature":
                     CurrentTemperature = thermoCoupleDriver.CurrentTemperature;
                     Application.Current.Dispatcher.Invoke(new Action(() => {
-                        logger.Add(lastTimePoint, Convert.ToDouble(thermoCoupleDriver.CurrentTemperature, CultureInfo.InvariantCulture));
-                        lastTimePoint += thermoCoupleDriver.Dt;
+                        logger.Add(thermoCoupleDriver.Time, Convert.ToDouble(thermoCoupleDriver.CurrentTemperature, CultureInfo.InvariantCulture));
                         plot.Refresh();
                     }));
                     Console.WriteLine("currentTemperature is delivered");
@@ -127,9 +126,10 @@ namespace ThermoCouple.MVVM.ViewModel {
                 CurrentTemperature = "No data";
                 MainPanelAvaliability = false;
                 thermoCoupleDriver.NeedToWrite = false;
-                lastTimePoint = 0;
-                Application.Current.Dispatcher.Invoke(new Action(() => {
+                DataLoggerButtonText = "Start logging";
+                Application.Current.Dispatcher.Invoke(new Action(() => { 
                     logger.Clear();
+                    plot.Refresh();
                 }));
                 Status = "Status: Please connect the sensor to receive data";
             } else {
@@ -142,6 +142,7 @@ namespace ThermoCouple.MVVM.ViewModel {
         }
 
         public void WriteData() {
+            thermoCoupleDriver.PathToWrite = dataPath;
             thermoCoupleDriver.NeedToWrite = !thermoCoupleDriver.NeedToWrite;
             if (thermoCoupleDriver.NeedToWrite) {
                 Status = "Status: Data recording in progress";
@@ -150,7 +151,6 @@ namespace ThermoCouple.MVVM.ViewModel {
                 Status = "Status: No data is currently being recorded";
                 DataLoggerButtonText = "Start logging";
             }
-            thermoCoupleDriver.PathToWrite = DataPath;
         }
 
         // Свойства

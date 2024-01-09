@@ -208,12 +208,25 @@
                                 Grid.Row="0"
                                 Grid.Column="0"/>
 
-                                <TextBox 
-                                x:Name="dataPath"
-                                Margin="10,5,5,10"
-                                Grid.Row="1"
-                                Grid.Column="0"
-                                Text="{Binding DataPath}"/>
+                                <Grid
+                                    Grid.Row="1"
+                                    Grid.Column="0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="40"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox 
+                                        x:Name="dataPath"
+                                        Margin="10,5,5,8"
+                                        VerticalAlignment="Bottom"
+                                        Text="{Binding DataPath}"/>
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        FontSize="18"
+                                        Text=".txt"/>
+                                </Grid>
 
                                 <Button 
                                 x:Name="OpenFileDialogButton"
@@ -232,13 +245,14 @@
                             HorizontalAlignment="Right"
                             Orientation="Horizontal">
                                 <Button
-                                Width="150"
-                                x:Name="startDataLogButton"
-                                VerticalAlignment="Bottom"
-                                Margin="10,10,5,10"
-                                Command="{Binding LogData}"
-                                Style="{DynamicResource MaterialDesignOutlinedDarkButton}"
-                                Content="{Binding DataLoggerButtonText}"/>
+                                    Width="150"
+                                    x:Name="startDataLogButton"
+                                    VerticalAlignment="Bottom"
+                                    Margin="10,10,5,10"
+                                    Command="{Binding LogData}"
+                                    Style="{DynamicResource MaterialDesignOutlinedDarkButton}"
+                                    Content="{Binding DataLoggerButtonText}"
+                                    IsEnabled="{Binding StartDataLogButtonAvaliability}"/>
                             </StackPanel>
                         </Grid>
 

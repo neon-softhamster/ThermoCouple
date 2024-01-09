@@ -11,6 +11,8 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Windows.Threading;
+using System.Diagnostics;
+using System.Globalization;
 
 namespace ThermoCouple.MVVM.Model {
     public class Driver : BaseM {
@@ -22,8 +24,12 @@ namespace ThermoCouple.MVVM.Model {
         private string errorMessage;
         private string portName;
         private string currentTemperature;
-        private double timer;
         private double dt;
+        private double timePoint;
+        private TimeSpan upTime;
+        private DateTime stopWatchUpTime;
+        private DateTime stopWatchOnLogStart;
+        private DateTime stopWatchDt;
         private List<string> serialPortsList;
         private SerialPort serialPort;
         DataModel dataModel = new DataModel();
@@ -40,23 +46,39 @@ namespace ThermoCouple.MVVM.Model {
             get => currentTemperature;
             set => currentTemperature = value;
         }
-        public double[] DataX {
-            get => dataModel.TimeAxis;
-        }
-        public double[] DataY {
-            get => dataModel.TemperatureAxis;
+        public double Time {
+            get => timePoint;
+            set => timePoint = value;
         }
 
         public bool NeedToWrite {
             get => needToWrite;
             set {
+                if (value) {
+                    StreamWriter sw = new StreamWriter(pathToWrite, append: true);
+                    sw.Write("Log started at " + DateTime.Now.ToString("dd.MM.yyyy hh:mm:ss") + "\n");
+                    sw.Write("UTC time\t" + "Rel. time\t" + "Δt, s\t" + "Temperature, °C\n");
+                    sw.Close();
+                }
+                stopWatchOnLogStart = DateTime.Now;
+                stopWatchDt = DateTime.Now;
                 needToWrite = value;
-                timer = 0;
             }
         }
 
         public string PathToWrite {
-            set => pathToWrite = value;
+            set {
+                if (File.Exists(value + ".txt")) {
+                    int file_number = 1;
+                    pathToWrite = value;
+                    while (File.Exists(pathToWrite + "_" + file_number.ToString() + ".txt") != false) {
+                        file_number++;
+                    }
+                    pathToWrite = pathToWrite + "_" + file_number.ToString() + ".txt";
+                } else {
+                    pathToWrite = value + ".txt";
+                }
+            }
         }
 
         public double Dt {
@@ -70,7 +92,6 @@ namespace ThermoCouple.MVVM.Model {
             serialPortsList = new List<string>();
             serialPort = new SerialPort();
             InitializePorts();
-            timer = 0;
             dt = 0.5;
         }
 
@@ -93,10 +114,11 @@ namespace ThermoCouple.MVVM.Model {
                 await CheckIfIsArduinoPortAsync();
 
                 if (isArduino) {
+                    stopWatchUpTime = DateTime.Now;
                     isConnected = true;
-                    DebugMessage("Arduino found and connected");
-                    serialPort.Write("d");
                     serialPort.DataReceived += SerialPort_DataReceived;
+                    serialPort.Write("d");
+                    DebugMessage("Arduino found and connected");
                 } else {
                     isConnected = false;
                     DebugMessage("Arduino not found");
@@ -135,6 +157,7 @@ namespace ThermoCouple.MVVM.Model {
             if (serialPort.IsOpen && isArduino) {
                 serialPort.Write("s");
                 serialPort.Close();
+                Time = 0;
                 serialPort.DataReceived -= SerialPort_DataReceived;
                 DebugMessage("Disconnection");
             }
@@ -184,17 +207,24 @@ namespace ThermoCouple.MVVM.Model {
                 errorMessage = "Wrong signal from sensor";
                 OnPropertyChanged(nameof(errorMessage));
             }
+            upTime = (DateTime.Now - stopWatchUpTime).Duration();
+            Time = upTime.TotalMinutes;
+            DebugMessage(upTime.TotalMinutes.ToString() + "  " + upTime.TotalSeconds.ToString());
 
             // запись данных
             if (needToWrite) {
                 try {
                     StreamWriter sw = new StreamWriter(pathToWrite, append: true);
-                    sw.Write(timer.ToString() + "\t" + currentTemperature + "\n");
-                    timer += dt;
+                    sw.Write(
+                        DateTime.Now.ToString("hh:mm:ss:fff") + "\t" +
+                        (DateTime.Now - stopWatchOnLogStart).Duration().ToString("hh\\:mm\\:ss\\:fff") + "\t" +
+                        (DateTime.Now - stopWatchDt).Duration().ToString("ss\\:fff") + "\t" +
+                        currentTemperature + "\n");
+                    stopWatchDt = DateTime.Now;
                     sw.Close();
                 } catch (Exception exc) {
-                    DebugMessage("°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°");
-                    MessageBox.Show(exc.Message);
+                    needToWrite = false;
+                    DebugMessage("Problem with writer:" + exc);
                 }
             }
         }
