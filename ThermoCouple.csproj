@@ -102,6 +102,7 @@
     <Compile Include="MVVM\Model\AdvancedBuffer.cs" />
     <Compile Include="MVVM\Model\BaseM.cs" />
     <Compile Include="MVVM\Model\DataModel.cs" />
+    <Compile Include="MVVM\Model\INIManager.cs" />
     <Compile Include="MVVM\ViewModel\ViewModel.cs" />
     <Compile Include="MVVM\ViewModel\BaseVM.cs" />
     <Compile Include="MVVM\View\MainWindow.xaml.cs">

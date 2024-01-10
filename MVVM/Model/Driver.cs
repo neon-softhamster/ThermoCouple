@@ -57,7 +57,7 @@ namespace ThermoCouple.MVVM.Model {
                 if (value) {
                     StreamWriter sw = new StreamWriter(pathToWrite, append: true);
                     sw.Write("Log started at " + DateTime.Now.ToString("dd.MM.yyyy hh:mm:ss") + "\n");
-                    sw.Write("UTC time\t" + "Rel. time\t" + "Δt, s\t" + "Temperature, °C\n");
+                    sw.Write("UTC time\t" + "Uptime\t\t" + "Δt, s\t" + "t, min\t" + "T, °C\n");
                     sw.Close();
                 }
                 stopWatchOnLogStart = DateTime.Now;
@@ -209,7 +209,7 @@ namespace ThermoCouple.MVVM.Model {
             }
             upTime = (DateTime.Now - stopWatchUpTime).Duration();
             Time = upTime.TotalMinutes;
-            DebugMessage(upTime.TotalMinutes.ToString() + "  " + upTime.TotalSeconds.ToString());
+            //DebugMessage(upTime.TotalMinutes.ToString() + "  " + upTime.TotalSeconds.ToString());
 
             // запись данных
             if (needToWrite) {
@@ -219,6 +219,7 @@ namespace ThermoCouple.MVVM.Model {
                         DateTime.Now.ToString("hh:mm:ss:fff") + "\t" +
                         (DateTime.Now - stopWatchOnLogStart).Duration().ToString("hh\\:mm\\:ss\\:fff") + "\t" +
                         (DateTime.Now - stopWatchDt).Duration().ToString("ss\\:fff") + "\t" +
+                        Convert.ToString(Math.Round(Time, 3), CultureInfo.InvariantCulture) + "\t" +
                         currentTemperature + "\n");
                     stopWatchDt = DateTime.Now;
                     sw.Close();

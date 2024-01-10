@@ -14,66 +14,87 @@ using System.ComponentModel;
 using ScottPlot;
 using System.Windows.Threading;
 using System.Globalization;
+using System.Runtime.InteropServices;
+using System.Reflection;
 
 namespace ThermoCouple.MVVM.ViewModel {
     public class ViewModel : BaseVM {
         // Поля
-        private Driver thermoCoupleDriver;
+        private Driver tcDriver;
         private bool isConnected;
         private bool connectButtonAvaliability;
         private bool mainPanelAvaliability;
         private string selectedPort;
-        private string _errorMessage;
+        private string errorMessage;
         private string connectButtonText;
         private string dataLoggerButtonText;
         private string currentTemperature;
         private string dataPath;
         private string statusBar;
+        private string selectedNoise;
+        private string selectedFrequency;
+        private string selectedBrightness;
         private double lastTimePoint = 0;
         private IList<string> portsList;
         private IList<string> frequencyList;
         private IList<string> noiseList;
         private IList<string> brightnessList;
-        private WpfPlot plot;
+        private WpfPlot graph;
         readonly ScottPlot.Plottable.DataLogger logger;
+        private INIManager iniManager;
 
         // Конструктор
         public ViewModel() {
-            thermoCoupleDriver = new Driver();
-            thermoCoupleDriver.PropertyChanged += ConnectionPropChanged;
+            // подключение к драйверу термопары
+            tcDriver = new Driver();
+            tcDriver.PropertyChanged += ConnectionPropChanged;
 
-            portsList = thermoCoupleDriver.SerialPortsList;
+            // заполение списков
+            portsList = tcDriver.SerialPortsList;
             frequencyList = new List<string>() {"0.5", "1", "2", "5"};
             noiseList = new List<string>() {"0", "0.5", "1", "2"};
             brightnessList = new List<string>() { "0", "1", "2", "3", "4", "5", "6"};
             selectedPort = portsList[0];
+            // чтение config.ini файла
+            iniManager = new INIManager(System.AppDomain.CurrentDomain.BaseDirectory + "config.ini");
+            SelectedNoise = iniManager.GetPrivateString("settings", "noise");
+            SelectedFrequency = iniManager.GetPrivateString("settings", "frequency");
+            SelectedBrightness = iniManager.GetPrivateString("settings", "brightness");
+
+            // Заполнение текстовых полей
             DataLoggerButtonText = "Start logging";
             ConnectButtonText = "Connect";
-            ConnectButtonAvaliability = true;
-            isConnected = thermoCoupleDriver.IsConnected;
             CurrentTemperature = "No data yet";
-            MainPanelAvaliability = false;
-            DataPath = System.AppDomain.CurrentDomain.BaseDirectory + "thermal_data";
             Status = "Status: Please connect the sensor to receive data";
+            DataPath = System.AppDomain.CurrentDomain.BaseDirectory + "thermal_data";
 
+            // логические значения
+            isConnected = tcDriver.IsConnected;
+            ConnectButtonAvaliability = true;
+            MainPanelAvaliability = false;
+
+            // создание экземпляров команд
             RefreshPortList = new RefreshPortListC(this);
             ConnectToPort = new ConnectToPortC(this);
             LogData = new StartDataWritingC(this);
 
-            plot = new WpfPlot();
-            plot.MinHeight = 350;
-            logger = plot.Plot.AddDataLogger();
+            // создание графика
+            graph = new WpfPlot();
+            logger = graph.Plot.AddDataLogger();
             logger.ViewFull();
-            plot.Plot.XAxis.Label("Minutes from the beginning, s", size: 16);
-            plot.Plot.YAxis.Label("Temperature, °C", size: 16);
-            plot.Plot.Title("Temperature on time", size: 20);
-            plot.Refresh();
+            logger.ManageAxisLimits = true;
+            graph.Plot.XAxis.Label("Uptime, min", size: 16);
+            graph.Plot.YAxis.Label("Temperature, °C", size: 16);
+            graph.Plot.Title("Temperature on time", size: 20);
+            graph.Plot.Layout(left: 50, right: 50, bottom: 50, top: 25);
+            graph.Plot.AxisAuto();
+            graph.Refresh();
         }
 
         void ConnectionPropChanged(object sender, PropertyChangedEventArgs e) {
             switch (e.PropertyName) {
                 case "isConnected":
-                    if (!thermoCoupleDriver.IsConnected) {
+                    if (!tcDriver.IsConnected) {
                         ConnectButtonText = "Connect";
                         MainPanelAvaliability = false;
                         Status = "Status: Please connect the sensor to receive data";
@@ -83,22 +104,22 @@ namespace ThermoCouple.MVVM.ViewModel {
                         MainPanelAvaliability = true;
                         Status = "Status: No data is currently being recorded";
                     }
-                    isConnected = thermoCoupleDriver.IsConnected;
+                    isConnected = tcDriver.IsConnected;
                     ConnectButtonAvaliability = true;
                     break;
 
                 case "errorMessage":
-                    Error = thermoCoupleDriver.ErrorMessage;
+                    Error = tcDriver.ErrorMessage;
                     ConnectButtonText = "Connect";
                     ConnectButtonAvaliability = true;
                     Console.WriteLine("Error msg had been delivered");
                     break;
 
                 case "currentTemperature":
-                    CurrentTemperature = thermoCoupleDriver.CurrentTemperature;
+                    CurrentTemperature = tcDriver.CurrentTemperature;
                     Application.Current.Dispatcher.Invoke(new Action(() => {
-                        logger.Add(thermoCoupleDriver.Time, Convert.ToDouble(thermoCoupleDriver.CurrentTemperature, CultureInfo.InvariantCulture));
-                        plot.Refresh();
+                        logger.Add(tcDriver.Time, Convert.ToDouble(tcDriver.CurrentTemperature, CultureInfo.InvariantCulture));
+                        graph.Refresh();
                     }));
                     Console.WriteLine("currentTemperature is delivered");
                     break;
@@ -112,29 +133,29 @@ namespace ThermoCouple.MVVM.ViewModel {
         public ICommand ConnectToPort { get; }
 
         public void RefreshPorts() {
-            thermoCoupleDriver.InitializePorts();
-            Ports = thermoCoupleDriver.SerialPortsList;
-            SelectedPort = thermoCoupleDriver.SerialPortsList[0];
+            tcDriver.InitializePorts();
+            Ports = tcDriver.SerialPortsList;
+            SelectedPort = tcDriver.SerialPortsList[0];
         }
 
         public void Connect() {
             if (isConnected) {
-                thermoCoupleDriver.DisconnectFromArduino();
+                tcDriver.DisconnectFromArduino();
 
                 isConnected = false;
                 ConnectButtonText = "Connect";
                 CurrentTemperature = "No data";
                 MainPanelAvaliability = false;
-                thermoCoupleDriver.NeedToWrite = false;
+                tcDriver.NeedToWrite = false;
                 DataLoggerButtonText = "Start logging";
                 Application.Current.Dispatcher.Invoke(new Action(() => { 
                     logger.Clear();
-                    plot.Refresh();
+                    graph.Refresh();
                 }));
                 Status = "Status: Please connect the sensor to receive data";
             } else {
-                thermoCoupleDriver.PortName = selectedPort;
-                Task.Run(() => thermoCoupleDriver.ConnectToArduinoAsync());
+                tcDriver.PortName = selectedPort;
+                Task.Run(() => tcDriver.ConnectToArduinoAsync());
 
                 ConnectButtonText = "Connection...";
                 ConnectButtonAvaliability = false;
@@ -142,9 +163,9 @@ namespace ThermoCouple.MVVM.ViewModel {
         }
 
         public void WriteData() {
-            thermoCoupleDriver.PathToWrite = dataPath;
-            thermoCoupleDriver.NeedToWrite = !thermoCoupleDriver.NeedToWrite;
-            if (thermoCoupleDriver.NeedToWrite) {
+            tcDriver.PathToWrite = dataPath;
+            tcDriver.NeedToWrite = !tcDriver.NeedToWrite;
+            if (tcDriver.NeedToWrite) {
                 Status = "Status: Data recording in progress";
                 DataLoggerButtonText = "Stop logging";
             } else {
@@ -194,9 +215,9 @@ namespace ThermoCouple.MVVM.ViewModel {
         }
 
         public string Error {
-            get { return _errorMessage; }
+            get { return errorMessage; }
             set {
-                _errorMessage = value;
+                errorMessage = value;
                 OnPropertyChanged("Error");
             }
         }
@@ -218,9 +239,9 @@ namespace ThermoCouple.MVVM.ViewModel {
         }
 
         public WpfPlot TemperatureGraph {
-            get { return plot; }
+            get { return graph; }
             set {
-                plot = value;
+                graph = value;
                 OnPropertyChanged(nameof(Plot));
             }
         }
@@ -242,9 +263,12 @@ namespace ThermoCouple.MVVM.ViewModel {
         }
 
         public string SelectedFrequency {
+            get { return selectedFrequency; }
             set {
-                thermoCoupleDriver.Dt = Convert.ToDouble(value, CultureInfo.InvariantCulture);
-                thermoCoupleDriver.TransmitCommand("frequency", Convert.ToDouble(value, CultureInfo.InvariantCulture));
+                selectedFrequency = value;
+                tcDriver.Dt = Convert.ToDouble(value, CultureInfo.InvariantCulture);
+                tcDriver.TransmitCommand("frequency", Convert.ToDouble(value, CultureInfo.InvariantCulture));
+                iniManager.WritePrivateString("settings", "frequency", value);
                 OnPropertyChanged(nameof(SelectedFrequency));
             }
         }
@@ -258,8 +282,11 @@ namespace ThermoCouple.MVVM.ViewModel {
         }
 
         public string SelectedNoise {
+            get { return selectedNoise; }
             set {
-                thermoCoupleDriver.TransmitCommand("noise", Convert.ToDouble(value, CultureInfo.InvariantCulture));
+                selectedNoise = value;
+                tcDriver.TransmitCommand("noise", Convert.ToDouble(value, CultureInfo.InvariantCulture));
+                iniManager.WritePrivateString("settings", "noise", value);
                 OnPropertyChanged(nameof(SelectedNoise));
             }
         }
@@ -273,8 +300,11 @@ namespace ThermoCouple.MVVM.ViewModel {
         }
 
         public string SelectedBrightness {
+            get { return selectedBrightness; }
             set {
-                thermoCoupleDriver.TransmitCommand("brigthness", Convert.ToDouble(value, CultureInfo.InvariantCulture));
+                selectedBrightness = value;
+                tcDriver.TransmitCommand("brigthness", Convert.ToDouble(value, CultureInfo.InvariantCulture));
+                iniManager.WritePrivateString("settings", "brightness", value);
                 OnPropertyChanged(nameof(SelectedBrightness));
             }
         }
