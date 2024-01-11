@@ -99,6 +99,7 @@
     <Compile Include="MVVM\Command\ConnectToPortC.cs" />
     <Compile Include="MVVM\Command\RefreshPortListC.cs" />
     <Compile Include="MVVM\Command\StartDataWritingC.cs" />
+    <Compile Include="MVVM\Command\UpdateScreenModeC.cs" />
     <Compile Include="MVVM\Model\AdvancedBuffer.cs" />
     <Compile Include="MVVM\Model\BaseM.cs" />
     <Compile Include="MVVM\Model\DataModel.cs" />

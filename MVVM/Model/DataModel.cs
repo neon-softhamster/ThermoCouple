@@ -27,16 +27,16 @@ namespace ThermoCouple.MVVM.Model {
             this.dt = 0.5;
         }
 
-        public void AddNewMeasurement(string newMeasurement) {
+        public void AddNewMeasurement(double newMeasurementX, double newMeasurementY) {
             for (int i = bufferMaxSize - 2; i >= 0; i -= 1) {
                 measurements[i + 1] = measurements[i];
             }
-            measurements[0] = double.Parse(newMeasurement, System.Globalization.CultureInfo.InvariantCulture);
+            measurements[0] = newMeasurementY;
 
             for (int i = bufferMaxSize - 2; i >= 0; i -= 1) {
-                time[i + 1] = time[i] - dt;
+                time[i + 1] = time[i];
             }
-            time[0] = 0;
+            time[0] = newMeasurementX;
         }
     }
 }

@@ -24,6 +24,7 @@ namespace ThermoCouple.MVVM.ViewModel {
         private bool isConnected;
         private bool connectButtonAvaliability;
         private bool mainPanelAvaliability;
+        private bool isAutoscale;
         private string selectedPort;
         private string errorMessage;
         private string connectButtonText;
@@ -34,7 +35,7 @@ namespace ThermoCouple.MVVM.ViewModel {
         private string selectedNoise;
         private string selectedFrequency;
         private string selectedBrightness;
-        private double lastTimePoint = 0;
+        private string tempStabilityCrit;
         private IList<string> portsList;
         private IList<string> frequencyList;
         private IList<string> noiseList;
@@ -49,17 +50,24 @@ namespace ThermoCouple.MVVM.ViewModel {
             tcDriver = new Driver();
             tcDriver.PropertyChanged += ConnectionPropChanged;
 
-            // заполение списков
-            portsList = tcDriver.SerialPortsList;
-            frequencyList = new List<string>() {"0.5", "1", "2", "5"};
-            noiseList = new List<string>() {"0", "0.5", "1", "2"};
-            brightnessList = new List<string>() { "0", "1", "2", "3", "4", "5", "6"};
-            selectedPort = portsList[0];
+            // создание графика
+            graph = new WpfPlot();
+            logger = graph.Plot.AddDataLogger();
+            graph.Plot.YAxis.SetBoundary(0, 100);
+            graph.Plot.XAxis.Label("Uptime, min", size: 16);
+            graph.Plot.YAxis.Label("Temperature, °C", size: 16);
+            graph.Plot.Title("Temperature on time", size: 20);
+            graph.Plot.Layout(left: 50, right: 50, bottom: 50, top: 25);
+            graph.Plot.AxisAuto();
+            graph.Refresh();
+
             // чтение config.ini файла
             iniManager = new INIManager(System.AppDomain.CurrentDomain.BaseDirectory + "config.ini");
             SelectedNoise = iniManager.GetPrivateString("settings", "noise");
             SelectedFrequency = iniManager.GetPrivateString("settings", "frequency");
             SelectedBrightness = iniManager.GetPrivateString("settings", "brightness");
+            TempStabilityCrit = iniManager.GetPrivateString("settings", "stability");
+            IsAutoscale = Convert.ToBoolean(iniManager.GetPrivateString("monitor", "autoscale"));
 
             // Заполнение текстовых полей
             DataLoggerButtonText = "Start logging";
@@ -67,6 +75,13 @@ namespace ThermoCouple.MVVM.ViewModel {
             CurrentTemperature = "No data yet";
             Status = "Status: Please connect the sensor to receive data";
             DataPath = System.AppDomain.CurrentDomain.BaseDirectory + "thermal_data";
+
+            // заполение списков
+            portsList = tcDriver.SerialPortsList;
+            frequencyList = new List<string>() { "0.5", "1", "2", "5" };
+            noiseList = new List<string>() { "0", "0.5", "1", "2" };
+            brightnessList = new List<string>() { "0", "1", "2", "3", "4", "5", "6" };
+            selectedPort = portsList[0];
 
             // логические значения
             isConnected = tcDriver.IsConnected;
@@ -77,18 +92,7 @@ namespace ThermoCouple.MVVM.ViewModel {
             RefreshPortList = new RefreshPortListC(this);
             ConnectToPort = new ConnectToPortC(this);
             LogData = new StartDataWritingC(this);
-
-            // создание графика
-            graph = new WpfPlot();
-            logger = graph.Plot.AddDataLogger();
-            logger.ViewFull();
-            logger.ManageAxisLimits = true;
-            graph.Plot.XAxis.Label("Uptime, min", size: 16);
-            graph.Plot.YAxis.Label("Temperature, °C", size: 16);
-            graph.Plot.Title("Temperature on time", size: 20);
-            graph.Plot.Layout(left: 50, right: 50, bottom: 50, top: 25);
-            graph.Plot.AxisAuto();
-            graph.Refresh();
+            UpdateScreenMode = new UpdateScreenModeC(this);
         }
 
         void ConnectionPropChanged(object sender, PropertyChangedEventArgs e) {
@@ -131,6 +135,7 @@ namespace ThermoCouple.MVVM.ViewModel {
         public ICommand LogData { get; }
         public ICommand RefreshPortList { get; }
         public ICommand ConnectToPort { get; }
+        public ICommand UpdateScreenMode { get; }
 
         public void RefreshPorts() {
             tcDriver.InitializePorts();
@@ -174,6 +179,11 @@ namespace ThermoCouple.MVVM.ViewModel {
             }
         }
 
+        public void UpdScrMode(object parameter) {
+            tcDriver.TransmitCommand("screen mode", Convert.ToDouble(parameter, CultureInfo.InvariantCulture));
+            iniManager.WritePrivateString("settings", "screenmode", parameter.ToString());
+        }
+
         // Свойства
         public bool MainPanelAvaliability {
             get { return mainPanelAvaliability; }
@@ -183,7 +193,6 @@ namespace ThermoCouple.MVVM.ViewModel {
                 Console.WriteLine("MainPanelAvaliability updated");
             }
         }
-
         public string CurrentTemperature {
             get {
                 if (isConnected)
@@ -196,7 +205,6 @@ namespace ThermoCouple.MVVM.ViewModel {
                 Console.WriteLine("CurrentTemperature updated");
             }
         }
-
         public IList<string> Ports {
             get { return portsList; }
             set {
@@ -205,7 +213,6 @@ namespace ThermoCouple.MVVM.ViewModel {
                 Console.WriteLine("Ports are being updated");
             }
         }
-
         public string SelectedPort {
             get { return selectedPort; }
             set {
@@ -213,7 +220,6 @@ namespace ThermoCouple.MVVM.ViewModel {
                 OnPropertyChanged("CurrentPort");
             }
         }
-
         public string Error {
             get { return errorMessage; }
             set {
@@ -221,7 +227,6 @@ namespace ThermoCouple.MVVM.ViewModel {
                 OnPropertyChanged("Error");
             }
         }
-
         public string ConnectButtonText {
             get { return connectButtonText; }
             set {
@@ -229,7 +234,6 @@ namespace ThermoCouple.MVVM.ViewModel {
                 OnPropertyChanged(nameof(ConnectButtonText));
             }
         }
-
         public bool ConnectButtonAvaliability {
             get { return connectButtonAvaliability; }
             set {
@@ -237,15 +241,6 @@ namespace ThermoCouple.MVVM.ViewModel {
                 OnPropertyChanged(nameof(ConnectButtonAvaliability));
             }
         }
-
-        public WpfPlot TemperatureGraph {
-            get { return graph; }
-            set {
-                graph = value;
-                OnPropertyChanged(nameof(Plot));
-            }
-        }
-
         public string DataPath {
             get { return dataPath; }
             set {
@@ -253,7 +248,6 @@ namespace ThermoCouple.MVVM.ViewModel {
                 OnPropertyChanged(nameof(DataPath));
             }
         }
-
         public string Status {
             get => statusBar;
             set {
@@ -261,7 +255,6 @@ namespace ThermoCouple.MVVM.ViewModel {
                 OnPropertyChanged(nameof(Status));
             }
         }
-
         public string SelectedFrequency {
             get { return selectedFrequency; }
             set {
@@ -272,7 +265,6 @@ namespace ThermoCouple.MVVM.ViewModel {
                 OnPropertyChanged(nameof(SelectedFrequency));
             }
         }
-
         public IList<string> FrequencyList { 
             get { return frequencyList; }
             set {
@@ -280,7 +272,6 @@ namespace ThermoCouple.MVVM.ViewModel {
                 OnPropertyChanged(nameof(FrequencyList));
             }
         }
-
         public string SelectedNoise {
             get { return selectedNoise; }
             set {
@@ -290,7 +281,6 @@ namespace ThermoCouple.MVVM.ViewModel {
                 OnPropertyChanged(nameof(SelectedNoise));
             }
         }
-
         public IList<string> NoiseList { 
             get { return noiseList; } 
             set {
@@ -298,7 +288,6 @@ namespace ThermoCouple.MVVM.ViewModel {
                 OnPropertyChanged(nameof(NoiseList));
             } 
         }
-
         public string SelectedBrightness {
             get { return selectedBrightness; }
             set {
@@ -308,7 +297,6 @@ namespace ThermoCouple.MVVM.ViewModel {
                 OnPropertyChanged(nameof(SelectedBrightness));
             }
         }
-
         public IList<string> BrightnessList {
             get { return brightnessList; }
             set {
@@ -316,12 +304,40 @@ namespace ThermoCouple.MVVM.ViewModel {
                 OnPropertyChanged(nameof(BrightnessList));
             }
         }
-
         public string DataLoggerButtonText { 
             get { return dataLoggerButtonText; }
             set { 
                 dataLoggerButtonText = value; 
                 OnPropertyChanged(nameof(DataLoggerButtonText));
+            }
+        }
+        public WpfPlot TemperatureGraph {
+            get => graph;
+            set {
+                graph = value;
+                OnPropertyChanged(nameof(TemperatureGraph));
+            }
+        }
+        public string TempStabilityCrit {
+            get { return tempStabilityCrit; }
+            set {
+                try {
+                    double isDouble = Convert.ToDouble(value, CultureInfo.InvariantCulture);
+                    tempStabilityCrit = value;
+                } catch {
+                    tempStabilityCrit = "0.5";
+                }
+                iniManager.WritePrivateString("settings", "stability", value);
+                OnPropertyChanged(nameof(TempStabilityCrit));
+            }
+        }
+        public bool IsAutoscale {
+            get => isAutoscale; 
+            set {
+                isAutoscale = value;
+                logger.ManageAxisLimits = value;
+                iniManager.WritePrivateString("monitor", "autoscale", Convert.ToString(value));
+                OnPropertyChanged(nameof(IsAutoscale));
             }
         }
     }

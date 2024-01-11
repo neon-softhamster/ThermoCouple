@@ -106,8 +106,7 @@
 
             <materialDesign:Card x:Name="MainPanel"
                                  Grid.Row="0"
-                                 Margin="5"
-                                 IsEnabled="{Binding MainPanelAvaliability}">
+                                 Margin="5">
                 <TabControl
                     Grid.Row="0"
                     materialDesign:NavigationRailAssist.ShowSelectionBackground="True"
@@ -135,7 +134,8 @@
                                     Text="  Monitor"/>
                             </StackPanel>
                         </TabItem.Header>
-                        <Grid>
+                        <Grid
+                            IsEnabled="{Binding MainPanelAvaliability}">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="50"/>
                                 <RowDefinition Height="*"/>
@@ -143,6 +143,12 @@
                             <Grid 
                                 Grid.Row="0"
                                 x:Name="TemperatureStateIndicator">
+                                <CheckBox
+                                    Content="Autoscale"
+                                    Margin="15,5,5,5"
+                                    FontSize="20"
+                                    IsChecked="{Binding IsAutoscale}"/>
+
                                 <TextBlock Grid.Row="0"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
@@ -162,8 +168,7 @@
                             <ContentControl 
                                 Grid.Row="1"
                                 Margin="5"
-                                MinHeight="350"
-                                VerticalAlignment="Center"
+                                VerticalAlignment="Stretch"
                                 Content="{Binding TemperatureGraph}"/>
                         </Grid>
                     </TabItem>
@@ -186,6 +191,7 @@
                             </StackPanel>
                         </TabItem.Header>
                         <Grid
+                            IsEnabled="{Binding MainPanelAvaliability}"
                             VerticalAlignment="Stretch">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="*"/>
@@ -257,7 +263,6 @@
                                         VerticalAlignment="Bottom"
                                         Margin="10,10,5,10"
                                         Command="{Binding LogData}"
-                                        Style="{DynamicResource MaterialDesignOutlinedDarkButton}"
                                         Content="{Binding DataLoggerButtonText}"
                                         IsEnabled="{Binding StartDataLogButtonAvaliability}"/>
                             </StackPanel>
@@ -281,7 +286,8 @@
                                     Text="  Settings"/>
                             </StackPanel>
                         </TabItem.Header>
-                        <StackPanel>
+                        <StackPanel
+                            IsEnabled="{Binding MainPanelAvaliability}">
                             <Grid 
                                 Margin="5"
                                 Background="#C9E5E5">
@@ -333,6 +339,28 @@
                                     VerticalAlignment="Center"
                                     FontSize="16"/>
 
+                                <Slider
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    Maximum="2"
+                                    Minimum="0"
+                                    TickFrequency="0.5"
+                                    Style="{StaticResource MaterialDesignDiscreteSlider}"
+                                    TickPlacement="BottomRight"
+                                    Value="{Binding SelectedNoise}"/>
+
+                                <Slider
+                                    Grid.Row="2"
+                                    Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    Maximum="6"
+                                    Minimum="0"
+                                    TickFrequency="1"
+                                    Style="{StaticResource MaterialDesignDiscreteSlider}"
+                                    TickPlacement="BottomRight"
+                                    Value="{Binding SelectedBrightness}"/>
+
                                 <ComboBox
                                     x:Name="NoiseSelector"
                                     Margin="5,0,5,0"
@@ -364,7 +392,8 @@
                                     Margin="5,5,5,5"
                                     Grid.Column="2"
                                     Grid.Row="5"
-                                    materialDesign:HintAssist.Hint="Write"/>
+                                    materialDesign:HintAssist.Hint="Write"
+                                    Text="{Binding TempStabilityCrit}"/>
 
                                 <Button x:Name="RoundDisplayModeButton"
                                         Margin="5,2,5,5"
@@ -372,7 +401,9 @@
                                         Grid.Column="1"
                                         Content="Round"
                                         FontSize="16"
-                                        Style="{StaticResource MaterialDesignOutlinedButton}"/>
+                                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                                        Command="{Binding UpdateScreenMode}"
+                                        CommandParameter="0"/>
 
                                 <Button x:Name="DecimalDisplayModeButton"
                                         Margin="5,2,5,5"
@@ -380,7 +411,9 @@
                                         Grid.Column="2"
                                         Content="Decimal"
                                         FontSize="16"
-                                        Style="{StaticResource MaterialDesignOutlinedButton}"/>
+                                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                                        Command="{Binding UpdateScreenMode}"
+                                        CommandParameter="1"/>
 
                             </Grid>
                         </StackPanel>
@@ -392,15 +425,23 @@
             <materialDesign:Card x:Name="StatusPanel"
                                  Grid.Row="1"
                                  Margin="5"
-                                 Background="PeachPuff">
+                                 Background="PeachPuff"/>
 
-                <TextBlock
-                    Grid.Row="1"
-                    VerticalAlignment="Center"
-                    Margin="10"
-                    FontSize="16"
-                    Text="{Binding Status}"/>
-            </materialDesign:Card>
+            <TextBlock
+                Grid.Row="1"
+                VerticalAlignment="Center"
+                Margin="15,10,10,10"
+                FontSize="16"
+                Text="{Binding Status}"/>
+
+            <TextBlock 
+                Grid.Row="1"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Margin="10,10,15,10"
+                FontSize="16"
+                Text="{Binding Path=CurrentTemperature}"/>
+
 
         </Grid>
     </Grid>

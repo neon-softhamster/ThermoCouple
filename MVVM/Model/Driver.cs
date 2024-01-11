@@ -179,13 +179,16 @@ namespace ThermoCouple.MVVM.Model {
             if (isArduino)
                 switch (type) {
                     case "frequency":
-                        serialPort.WriteLine("f" + Math.Round(value * 1000).ToString());
+                        serialPort.WriteLine("f" + Math.Round(value * 1000 - 16).ToString());
                         break;
                     case "noise":
                         serialPort.WriteLine("n" + value.ToString());
                         break;
                     case "brigthness":
                         serialPort.WriteLine("b" + value.ToString());
+                        break;
+                    case "screen mode":
+                        serialPort.WriteLine("m" + value.ToString());
                         break;
                 }
         }
@@ -199,17 +202,16 @@ namespace ThermoCouple.MVVM.Model {
         private delegate void LineReceivedEvent(string incomeMessage);
 
         private void LineReceived(string incomeMessage) {
+            upTime = (DateTime.Now - stopWatchUpTime).Duration();
+            Time = upTime.TotalMinutes;
             try {
-                currentTemperature = incomeMessage.ToString().Remove(5);
-                dataModel.AddNewMeasurement(currentTemperature);
+                currentTemperature = incomeMessage.Remove(5);
+                dataModel.AddNewMeasurement(timePoint, double.Parse(currentTemperature, System.Globalization.CultureInfo.InvariantCulture));
                 OnPropertyChanged(nameof(currentTemperature));
             } catch {
                 errorMessage = "Wrong signal from sensor";
                 OnPropertyChanged(nameof(errorMessage));
             }
-            upTime = (DateTime.Now - stopWatchUpTime).Duration();
-            Time = upTime.TotalMinutes;
-            //DebugMessage(upTime.TotalMinutes.ToString() + "  " + upTime.TotalSeconds.ToString());
 
             // запись данных
             if (needToWrite) {
