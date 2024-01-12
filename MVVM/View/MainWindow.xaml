@@ -341,7 +341,7 @@
 
                                 <Slider
                                     Grid.Row="0"
-                                    Grid.Column="1"
+                                    Grid.Column="2"
                                     VerticalAlignment="Center"
                                     Maximum="2"
                                     Minimum="0"
@@ -352,7 +352,7 @@
 
                                 <Slider
                                     Grid.Row="2"
-                                    Grid.Column="1"
+                                    Grid.Column="2"
                                     VerticalAlignment="Center"
                                     Maximum="6"
                                     Minimum="0"
@@ -362,15 +362,6 @@
                                     Value="{Binding SelectedBrightness}"/>
 
                                 <ComboBox
-                                    x:Name="NoiseSelector"
-                                    Margin="5,0,5,0"
-                                    Grid.Column="2"
-                                    Grid.Row="0"
-                                    materialDesign:HintAssist.Hint="Select"
-                                    ItemsSource="{Binding NoiseList}"
-                                    SelectedItem="{Binding SelectedNoise}"/>
-
-                                <ComboBox
                                     x:Name="FreqSelector"
                                     Margin="5,0,5,0"
                                     Grid.Column="2"
@@ -378,15 +369,6 @@
                                     materialDesign:HintAssist.Hint="Select"
                                     ItemsSource="{Binding FrequencyList}"
                                     SelectedItem="{Binding SelectedFrequency}"/>
-
-                                <ComboBox
-                                    x:Name="BrightnessSelector"
-                                    Margin="5,0,5,0"
-                                    Grid.Column="2"
-                                    Grid.Row="2"
-                                    materialDesign:HintAssist.Hint="Select"
-                                    ItemsSource="{Binding BrightnessList}"
-                                    SelectedItem="{Binding SelectedBrightness}"/>
 
                                 <TextBox
                                     Margin="5,5,5,5"

@@ -36,10 +36,9 @@ namespace ThermoCouple.MVVM.ViewModel {
         private string selectedFrequency;
         private string selectedBrightness;
         private string tempStabilityCrit;
+        private string screenMode;
         private IList<string> portsList;
         private IList<string> frequencyList;
-        private IList<string> noiseList;
-        private IList<string> brightnessList;
         private WpfPlot graph;
         readonly ScottPlot.Plottable.DataLogger logger;
         private INIManager iniManager;
@@ -68,6 +67,7 @@ namespace ThermoCouple.MVVM.ViewModel {
             SelectedBrightness = iniManager.GetPrivateString("settings", "brightness");
             TempStabilityCrit = iniManager.GetPrivateString("settings", "stability");
             IsAutoscale = Convert.ToBoolean(iniManager.GetPrivateString("monitor", "autoscale"));
+            screenMode = iniManager.GetPrivateString("settings", "screenmode");
 
             // Заполнение текстовых полей
             DataLoggerButtonText = "Start logging";
@@ -78,9 +78,7 @@ namespace ThermoCouple.MVVM.ViewModel {
 
             // заполение списков
             portsList = tcDriver.SerialPortsList;
-            frequencyList = new List<string>() { "0.5", "1", "2", "5" };
-            noiseList = new List<string>() { "0", "0.5", "1", "2" };
-            brightnessList = new List<string>() { "0", "1", "2", "3", "4", "5", "6" };
+            frequencyList = new List<string>() { "0.5", "1" };
             selectedPort = portsList[0];
 
             // логические значения
@@ -107,6 +105,11 @@ namespace ThermoCouple.MVVM.ViewModel {
                         Error = "";
                         MainPanelAvaliability = true;
                         Status = "Status: No data is currently being recorded";
+
+                        tcDriver.TransmitCommand("brightness", Convert.ToDouble(selectedBrightness, CultureInfo.InvariantCulture));
+                        tcDriver.TransmitCommand("noise", Convert.ToDouble(selectedNoise, CultureInfo.InvariantCulture));
+                        tcDriver.TransmitCommand("frequency", Convert.ToDouble(selectedFrequency, CultureInfo.InvariantCulture));
+                        tcDriver.TransmitCommand("screen mode", Convert.ToDouble(screenMode, CultureInfo.InvariantCulture));
                     }
                     isConnected = tcDriver.IsConnected;
                     ConnectButtonAvaliability = true;
@@ -281,13 +284,6 @@ namespace ThermoCouple.MVVM.ViewModel {
                 OnPropertyChanged(nameof(SelectedNoise));
             }
         }
-        public IList<string> NoiseList { 
-            get { return noiseList; } 
-            set {
-                noiseList = value;
-                OnPropertyChanged(nameof(NoiseList));
-            } 
-        }
         public string SelectedBrightness {
             get { return selectedBrightness; }
             set {
@@ -295,13 +291,6 @@ namespace ThermoCouple.MVVM.ViewModel {
                 tcDriver.TransmitCommand("brigthness", Convert.ToDouble(value, CultureInfo.InvariantCulture));
                 iniManager.WritePrivateString("settings", "brightness", value);
                 OnPropertyChanged(nameof(SelectedBrightness));
-            }
-        }
-        public IList<string> BrightnessList {
-            get { return brightnessList; }
-            set {
-                brightnessList = value;
-                OnPropertyChanged(nameof(BrightnessList));
             }
         }
         public string DataLoggerButtonText { 

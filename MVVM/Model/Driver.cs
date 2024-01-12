@@ -179,7 +179,7 @@ namespace ThermoCouple.MVVM.Model {
             if (isArduino)
                 switch (type) {
                     case "frequency":
-                        serialPort.WriteLine("f" + Math.Round(value * 1000 - 16).ToString());
+                        serialPort.WriteLine("f" + Math.Round(value * 1000).ToString());
                         break;
                     case "noise":
                         serialPort.WriteLine("n" + value.ToString());
@@ -219,9 +219,9 @@ namespace ThermoCouple.MVVM.Model {
                     StreamWriter sw = new StreamWriter(pathToWrite, append: true);
                     sw.Write(
                         DateTime.Now.ToString("hh:mm:ss:fff") + "\t" +
-                        (DateTime.Now - stopWatchOnLogStart).Duration().ToString("hh\\:mm\\:ss\\:fff") + "\t" +
+                        upTime.ToString("hh\\:mm\\:ss\\:fff") + "\t" +
                         (DateTime.Now - stopWatchDt).Duration().ToString("ss\\:fff") + "\t" +
-                        Convert.ToString(Math.Round(Time, 3), CultureInfo.InvariantCulture) + "\t" +
+                        Convert.ToString(Math.Round((DateTime.Now - stopWatchOnLogStart).Duration().TotalMinutes, 3), CultureInfo.InvariantCulture) + "\t" +
                         currentTemperature + "\n");
                     stopWatchDt = DateTime.Now;
                     sw.Close();
