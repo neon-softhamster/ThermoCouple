@@ -25,19 +25,26 @@ namespace ThermoCouple.MVVM.ViewModel {
         private bool connectButtonAvaliability;
         private bool mainPanelAvaliability;
         private bool isAutoscale;
+        private Visibility tempGoesUp;
+        private Visibility tempGoesDown;
+        private Visibility tempIsStable;
         private string selectedPort;
         private string errorMessage;
         private string connectButtonText;
         private string dataLoggerButtonText;
         private string currentTemperature;
-        private string dataPath;
+        private string temperatureTrend;
+        private string dataPathFolder;
+        private string dataPathFile;
         private string statusBar;
         private string selectedNoise;
         private string selectedFrequency;
         private string selectedBrightness;
+        private string selectedMinutes;
         private string tempStabilityCrit;
         private string screenMode;
         private IList<string> portsList;
+        private IList<string> minutesList;
         private IList<string> frequencyList;
         private WpfPlot graph;
         readonly ScottPlot.Plottable.DataLogger logger;
@@ -65,6 +72,7 @@ namespace ThermoCouple.MVVM.ViewModel {
             SelectedNoise = iniManager.GetPrivateString("settings", "noise");
             SelectedFrequency = iniManager.GetPrivateString("settings", "frequency");
             SelectedBrightness = iniManager.GetPrivateString("settings", "brightness");
+            SelectedMinutes = iniManager.GetPrivateString("settings", "minutesToSmooth");
             TempStabilityCrit = iniManager.GetPrivateString("settings", "stability");
             IsAutoscale = Convert.ToBoolean(iniManager.GetPrivateString("monitor", "autoscale"));
             screenMode = iniManager.GetPrivateString("settings", "screenmode");
@@ -74,17 +82,22 @@ namespace ThermoCouple.MVVM.ViewModel {
             ConnectButtonText = "Connect";
             CurrentTemperature = "No data yet";
             Status = "Status: Please connect the sensor to receive data";
-            DataPath = System.AppDomain.CurrentDomain.BaseDirectory + "thermal_data";
+            DataPathFolder = System.AppDomain.CurrentDomain.BaseDirectory;
+            DataPathFile = "thermal_data";
 
             // заполение списков
             portsList = tcDriver.SerialPortsList;
             frequencyList = new List<string>() { "0.5", "1" };
+            minutesList = new List<string>() { "0.3", "0.5", "1", "3" };
             selectedPort = portsList[0];
 
             // логические значения
             isConnected = tcDriver.IsConnected;
             ConnectButtonAvaliability = true;
             MainPanelAvaliability = false;
+            TempIsStable = Visibility.Visible;
+            TempGoesUp = Visibility.Hidden;
+            TempGoesDown = Visibility.Hidden;
 
             // создание экземпляров команд
             RefreshPortList = new RefreshPortListC(this);
@@ -117,13 +130,29 @@ namespace ThermoCouple.MVVM.ViewModel {
 
                 case "errorMessage":
                     Error = tcDriver.ErrorMessage;
-                    ConnectButtonText = "Connect";
-                    ConnectButtonAvaliability = true;
+                    // ConnectButtonText = "Connect";
+                    // ConnectButtonAvaliability = true;
                     Console.WriteLine("Error msg had been delivered");
                     break;
 
                 case "currentTemperature":
                     CurrentTemperature = tcDriver.CurrentTemperature;
+                    TemperatureTrend = Convert.ToString(Math.Round(tcDriver.DataModel.TemperatureTrend, 2), CultureInfo.InvariantCulture);
+
+                    if (tcDriver.DataModel.Stability == 0) {
+                        TempIsStable = Visibility.Visible;
+                        TempGoesUp = Visibility.Hidden;
+                        TempGoesDown = Visibility.Hidden;
+                    } else if (tcDriver.DataModel.Stability > 0) {
+                        TempGoesUp = Visibility.Visible;
+                        TempGoesDown = Visibility.Hidden;
+                        TempIsStable = Visibility.Hidden;
+                    } else {
+                        TempGoesDown = Visibility.Visible;
+                        TempGoesUp = Visibility.Hidden;
+                        TempIsStable = Visibility.Hidden;
+                    }
+
                     Application.Current.Dispatcher.Invoke(new Action(() => {
                         logger.Add(tcDriver.Time, Convert.ToDouble(tcDriver.CurrentTemperature, CultureInfo.InvariantCulture));
                         graph.Refresh();
@@ -153,10 +182,11 @@ namespace ThermoCouple.MVVM.ViewModel {
                 isConnected = false;
                 ConnectButtonText = "Connect";
                 CurrentTemperature = "No data";
+                TemperatureTrend = "";
                 MainPanelAvaliability = false;
                 tcDriver.NeedToWrite = false;
                 DataLoggerButtonText = "Start logging";
-                Application.Current.Dispatcher.Invoke(new Action(() => { 
+                Application.Current.Dispatcher.Invoke(new Action(() => {
                     logger.Clear();
                     graph.Refresh();
                 }));
@@ -171,7 +201,7 @@ namespace ThermoCouple.MVVM.ViewModel {
         }
 
         public void WriteData() {
-            tcDriver.PathToWrite = dataPath;
+            tcDriver.PathToWrite = dataPathFolder + dataPathFile;
             tcDriver.NeedToWrite = !tcDriver.NeedToWrite;
             if (tcDriver.NeedToWrite) {
                 Status = "Status: Data recording in progress";
@@ -199,13 +229,23 @@ namespace ThermoCouple.MVVM.ViewModel {
         public string CurrentTemperature {
             get {
                 if (isConnected)
-                    return currentTemperature.Remove(4) + "°C";
+                    return "T = " + currentTemperature.Remove(4) + "°C";
                 else return currentTemperature;
             }
             set {
                 currentTemperature = value;
                 OnPropertyChanged(nameof(CurrentTemperature));
                 Console.WriteLine("CurrentTemperature updated");
+            }
+        }
+        public string TemperatureTrend {
+            get {
+                if (isConnected)
+                    return " ∂T/∂t = " + temperatureTrend + " °C/min";
+                else return temperatureTrend; } 
+            set { 
+                temperatureTrend = value;
+                OnPropertyChanged(nameof(TemperatureTrend));
             }
         }
         public IList<string> Ports {
@@ -244,11 +284,18 @@ namespace ThermoCouple.MVVM.ViewModel {
                 OnPropertyChanged(nameof(ConnectButtonAvaliability));
             }
         }
-        public string DataPath {
-            get { return dataPath; }
+        public string DataPathFolder {
+            get { return dataPathFolder; }
             set {
-                dataPath = value;
-                OnPropertyChanged(nameof(DataPath));
+                dataPathFolder = value;
+                OnPropertyChanged(nameof(DataPathFolder));
+            }
+        }
+        public string DataPathFile {
+            get { return dataPathFile; }
+            set {
+                dataPathFile = value;
+                OnPropertyChanged(nameof(DataPathFile));
             }
         }
         public string Status {
@@ -316,6 +363,7 @@ namespace ThermoCouple.MVVM.ViewModel {
                 } catch {
                     tempStabilityCrit = "0.5";
                 }
+                tcDriver.DataModel.StabilityСriterion = Convert.ToDouble(value, CultureInfo.InvariantCulture);
                 iniManager.WritePrivateString("settings", "stability", value);
                 OnPropertyChanged(nameof(TempStabilityCrit));
             }
@@ -328,6 +376,43 @@ namespace ThermoCouple.MVVM.ViewModel {
                 iniManager.WritePrivateString("monitor", "autoscale", Convert.ToString(value));
                 OnPropertyChanged(nameof(IsAutoscale));
             }
+        }
+        public Visibility TempGoesUp {  
+            get => tempGoesUp; 
+            set { 
+                tempGoesUp = value;
+                OnPropertyChanged(nameof(TempGoesUp));
+            } 
+        }
+        public Visibility TempGoesDown { 
+            get => tempGoesDown; 
+            set {
+                tempGoesDown = value;
+                OnPropertyChanged(nameof(TempGoesDown));
+            } 
+        }
+        public Visibility TempIsStable { 
+            get => tempIsStable; 
+            set {
+                tempIsStable = value;
+                OnPropertyChanged(nameof(TempIsStable));
+            } 
+        }
+        public IList<string> MinutesList { 
+            get => minutesList; 
+            set {
+                minutesList = value;
+                OnPropertyChanged(nameof(MinutesList));
+            } 
+        }
+        public string SelectedMinutes { 
+            get => selectedMinutes; 
+            set {
+                selectedMinutes = value;
+                iniManager.WritePrivateString("settings", "minutesToSmooth", value);
+                tcDriver.DataModel.StabilityСriterionInterval = Convert.ToDouble(value, CultureInfo.InvariantCulture);
+                OnPropertyChanged(nameof(SelectedMinutes));
+            } 
         }
     }
 }

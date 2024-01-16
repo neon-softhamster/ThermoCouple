@@ -50,6 +50,7 @@ namespace ThermoCouple.MVVM.Model {
             get => timePoint;
             set => timePoint = value;
         }
+        public DataModel DataModel { get => dataModel; }
 
         public bool NeedToWrite {
             get => needToWrite;
@@ -204,12 +205,26 @@ namespace ThermoCouple.MVVM.Model {
         private void LineReceived(string incomeMessage) {
             upTime = (DateTime.Now - stopWatchUpTime).Duration();
             Time = upTime.TotalMinutes;
+
             try {
                 currentTemperature = incomeMessage.Remove(5);
-                dataModel.AddNewMeasurement(timePoint, double.Parse(currentTemperature, System.Globalization.CultureInfo.InvariantCulture));
                 OnPropertyChanged(nameof(currentTemperature));
             } catch {
                 errorMessage = "Wrong signal from sensor";
+                OnPropertyChanged(nameof(errorMessage));
+            }
+
+            try {
+                dataModel.AddNewMeasurement(timePoint, double.Parse(currentTemperature, System.Globalization.CultureInfo.InvariantCulture));
+            } catch (Exception exe) {
+                errorMessage = exe.Message;
+                OnPropertyChanged(nameof(errorMessage));
+            }
+
+            try {
+                dataModel.StabilityCheck();
+            } catch (Exception exe) {
+                errorMessage = "!!!!!!!!!!" + exe.Message;
                 OnPropertyChanged(nameof(errorMessage));
             }
 

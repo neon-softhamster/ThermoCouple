@@ -137,7 +137,7 @@
                         <Grid
                             IsEnabled="{Binding MainPanelAvaliability}">
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="50"/>
+                                <RowDefinition Height="80"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
                             <Grid 
@@ -146,23 +146,54 @@
                                 <CheckBox
                                     Content="Autoscale"
                                     Margin="15,5,5,5"
-                                    FontSize="20"
+                                    HorizontalAlignment="Left"
                                     IsChecked="{Binding IsAutoscale}"/>
 
-                                <TextBlock Grid.Row="0"
+                                <StackPanel
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
-                                    FontWeight="Bold"
-                                    FontSize="20"
-                                    Text="{Binding Path=CurrentTemperature}"/>
+                                    Orientation="Vertical"
+                                    Margin="5">
+                                    <TextBlock
+                                        HorizontalAlignment="Center"
+                                        FontWeight="Bold"
+                                        FontSize="20"
+                                        Text="{Binding Path=CurrentTemperature}"/>
+                                    <TextBlock
+                                        HorizontalAlignment="Center"
+                                        FontWeight="Bold"
+                                        FontSize="20"
+                                        Text="{Binding TemperatureTrend}"/>
+                                </StackPanel>
+                                
+                                <materialDesign:PackIcon 
+                                        Visibility="{Binding TempGoesDown}"
+                                        Kind="ThermometerMinus" 
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        Margin="10"
+                                        Width="30"
+                                        Height="30"/>
 
                                 <materialDesign:PackIcon 
-                                    Kind="ThermometerCheck"
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Center"
-                                    Margin="10"
-                                    Width="30"
-                                    Height="30"/>
+                                        Visibility="{Binding TempIsStable}"
+                                        Kind="ThermometerCheck" 
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        Margin="10"
+                                        Width="30"
+                                        Height="30"/>
+
+                                <materialDesign:PackIcon 
+                                        Visibility="{Binding TempGoesUp}"
+                                        Kind="ThermometerPlus"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        Margin="10"
+                                        Width="30"
+                                        Height="30"/>
+
+
                             </Grid>
 
                             <ContentControl 
@@ -198,74 +229,79 @@
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
 
-                            <Grid 
-                                VerticalAlignment="Top"
+                            <Grid
                                 Grid.Row="0"
+                                Grid.Column="0"
                                 Margin="5"
-                                Background="#C9E5E5">
+                                Background="#E5E5E5"
+                                VerticalAlignment="Top">
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="*"/>
-                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="40"/>
+                                    <RowDefinition Height="40"/>
+                                    <RowDefinition Height="40"/>
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="60"/>
                                     <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="150"/>
+                                    <ColumnDefinition Width="40"/>
                                 </Grid.ColumnDefinitions>
-
                                 <TextBlock 
-                                    Grid.ColumnSpan="2"
+                                    Grid.ColumnSpan="3"
                                     Text="Where to write data?"
-                                    Margin="10,10,5,0"
                                     FontSize="16"
-                                    HorizontalAlignment="Left"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
                                     Grid.Row="0"
                                     Grid.Column="0"/>
-
-                                <Grid
+                                <TextBox 
                                         Grid.Row="1"
-                                        Grid.Column="0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="40"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBox 
-                                            x:Name="dataPath"
-                                            Margin="10,5,5,8"
-                                            VerticalAlignment="Bottom"
-                                            Text="{Binding DataPath}"/>
-                                    <TextBlock
-                                            Grid.Column="1"
-                                            VerticalAlignment="Center"
-                                            HorizontalAlignment="Center"
-                                            FontSize="18"
-                                            Text=".txt"/>
-                                </Grid>
-
-                                <Button 
-                                    x:Name="OpenFileDialogButton"
-                                    Margin="10,5,5,10"
-                                    Grid.Row="1"
-                                    Grid.Column="1"
-                                    Content="Select path"
-                                    FontSize="16"
-                                    Style="{StaticResource MaterialDesignOutlinedButton}"/>
+                                        Grid.Column="1"
+                                        x:Name="dataPathFolder"
+                                        Margin="10,5,5,8"
+                                        VerticalAlignment="Center"
+                                        Text="{Binding DataPathFolder}"/>
+                                <TextBox 
+                                        Grid.Row="2"
+                                        Grid.Column="1"
+                                        x:Name="dataPathFile"
+                                        Margin="10,5,5,8"
+                                        VerticalAlignment="Center"
+                                        Text="{Binding DataPathFile}"/>
+                                <TextBlock
+                                        Grid.Row="1"
+                                        Grid.Column="0"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Right"
+                                        FontSize="16"
+                                        Text="Folder:"/>
+                                <TextBlock
+                                        Grid.Row="2"
+                                        Grid.Column="0"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Right"
+                                        FontSize="16"
+                                        Text="File:"/>
+                                <TextBlock
+                                        Grid.Row="2"
+                                        Grid.Column="2"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        FontSize="16"
+                                        Text=".txt"/>
                             </Grid>
 
-                            <StackPanel
+
+                            <Button
                                 Grid.Row="1"
-                                Margin="5"
-                                VerticalAlignment="Bottom"
                                 HorizontalAlignment="Right"
-                                Orientation="Horizontal">
-                                <Button
-                                        Width="150"
-                                        x:Name="startDataLogButton"
-                                        VerticalAlignment="Bottom"
-                                        Margin="10,10,5,10"
-                                        Command="{Binding LogData}"
-                                        Content="{Binding DataLoggerButtonText}"
-                                        IsEnabled="{Binding StartDataLogButtonAvaliability}"/>
-                            </StackPanel>
+                                Width="150"
+                                x:Name="startDataLogButton"
+                                VerticalAlignment="Bottom"
+                                Margin="10,10,10,10"
+                                Command="{Binding LogData}"
+                                Content="{Binding DataLoggerButtonText}"
+                                IsEnabled="{Binding StartDataLogButtonAvaliability}"/>
+
                         </Grid>
 
                     </TabItem>
@@ -290,8 +326,9 @@
                             IsEnabled="{Binding MainPanelAvaliability}">
                             <Grid 
                                 Margin="5"
-                                Background="#C9E5E5">
+                                Background="#E5E5E5">
                                 <Grid.RowDefinitions>
+                                    <RowDefinition Height="40"/>
                                     <RowDefinition Height="40"/>
                                     <RowDefinition Height="40"/>
                                     <RowDefinition Height="40"/>
@@ -333,6 +370,22 @@
                                     FontSize="16"/>
 
                                 <TextBlock
+                                    Grid.Row="5"
+                                    Margin="10,5,10,5"
+                                    Text="Check stability based on last X minutes"
+                                    VerticalAlignment="Center"
+                                    FontSize="16"/>
+
+                                <TextBlock
+                                    Grid.Row="5"
+                                    Grid.Column="1"
+                                    Margin="10,5,0,5"
+                                    Text="X = "
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    FontSize="16"/>
+
+                                <TextBlock
                                     Grid.Row="4"
                                     Margin="10,5,10,5"
                                     Text="Temperature stability criterion, °C/min"
@@ -370,10 +423,19 @@
                                     ItemsSource="{Binding FrequencyList}"
                                     SelectedItem="{Binding SelectedFrequency}"/>
 
+                                <ComboBox
+                                    x:Name="StabilityMinutes"
+                                    Margin="5,0,5,0"
+                                    Grid.Column="2"
+                                    Grid.Row="5"
+                                    materialDesign:HintAssist.Hint="Select"
+                                    ItemsSource="{Binding MinutesList}"
+                                    SelectedItem="{Binding SelectedMinutes}"/>
+
                                 <TextBox
                                     Margin="5,5,5,5"
                                     Grid.Column="2"
-                                    Grid.Row="5"
+                                    Grid.Row="4"
                                     materialDesign:HintAssist.Hint="Write"
                                     Text="{Binding TempStabilityCrit}"/>
 
