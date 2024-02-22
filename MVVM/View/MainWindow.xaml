@@ -9,7 +9,7 @@
         mc:Ignorable="d"
         FontSize="16"
         FontFamily="Calibri"
-        Title="ThermoCouple v0.7"
+        Title="ThermoCouple v0.9"
         Icon="/MVVM/View/sin wave.png"
         WindowStartupLocation="CenterScreen"
         MinHeight="500"
